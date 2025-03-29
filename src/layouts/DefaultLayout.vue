@@ -13,7 +13,7 @@
     </v-navigation-drawer>
 
     <v-main>
-      <v-container>
+      <v-container fluid>
         <slot/>
       </v-container>
     </v-main>
