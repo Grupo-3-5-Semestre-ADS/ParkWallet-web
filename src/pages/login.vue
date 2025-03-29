@@ -43,12 +43,12 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import {ref} from 'vue'
 
 export default {
   name: 'LoginPage',
 
-  setup () {
+  setup() {
     const email = ref('')
     const password = ref('')
 
