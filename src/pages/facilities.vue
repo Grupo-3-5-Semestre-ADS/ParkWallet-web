@@ -1,45 +1,104 @@
 <template>
   <v-row class="align-center mb-4">
     <v-col cols="6">
-      <v-text-field v-model="search" label="Buscar Facility" variant="outlined" density="compact"
-                    clearable></v-text-field>
+      <v-text-field
+        v-model="search"
+        label="Buscar Facility"
+        variant="outlined"
+        density="compact"
+        clearable
+      />
     </v-col>
-    <v-col cols="6" class="text-right">
-      <v-btn color="primary" @click="openDialog">Adicionar Facility</v-btn>
+    <v-col
+      cols="6"
+      class="text-right"
+    >
+      <v-btn
+        color="primary"
+        @click="openDialog"
+      >
+        Adicionar Facility
+      </v-btn>
     </v-col>
   </v-row>
 
-  <v-data-table :items="filteredFacilities" :headers="headers" items-per-page="5">
-    <template v-slot:item.actions="{ item }">
-      <v-btn icon color="blue" @click="editFacility(item)">
+  <v-data-table
+    :items="filteredFacilities"
+    :headers="headers"
+    items-per-page="5"
+  >
+    <template #item.actions="{ item }">
+      <v-btn
+        icon
+        color="blue"
+        @click="editFacility(item)"
+      >
         <v-icon>mdi-pencil</v-icon>
       </v-btn>
-      <v-btn icon color="red" @click="deleteFacility(item)">
+      <v-btn
+        icon
+        color="red"
+        @click="deleteFacility(item)"
+      >
         <v-icon>mdi-delete</v-icon>
       </v-btn>
     </template>
   </v-data-table>
 
   <!-- Modal de Adicionar/Editar -->
-  <v-dialog v-model="dialog" max-width="500px">
+  <v-dialog
+    v-model="dialog"
+    max-width="500px"
+  >
     <v-card>
       <v-card-title>{{ editMode ? 'Editar Facility' : 'Adicionar Facility' }}</v-card-title>
       <v-card-text>
-        <v-text-field v-model="facility.name" label="Nome" required></v-text-field>
-        <v-text-field v-model="facility.description" label="Descrição"></v-text-field>
-        <v-text-field v-model="facility.type" label="Tipo" required></v-text-field>
-        <v-text-field v-model="facility.latitude" label="Latitude" type="number" required></v-text-field>
-        <v-text-field v-model="facility.longitude" label="Longitude" type="number" required></v-text-field>
+        <v-text-field
+          v-model="facility.name"
+          label="Nome"
+          required
+        />
+        <v-text-field
+          v-model="facility.description"
+          label="Descrição"
+        />
+        <v-text-field
+          v-model="facility.type"
+          label="Tipo"
+          required
+        />
+        <v-text-field
+          v-model="facility.latitude"
+          label="Latitude"
+          type="number"
+          required
+        />
+        <v-text-field
+          v-model="facility.longitude"
+          label="Longitude"
+          type="number"
+          required
+        />
       </v-card-text>
       <v-card-actions>
-        <v-btn color="gray" @click="dialog = false">Cancelar</v-btn>
-        <v-btn color="primary" @click="saveFacility">Salvar</v-btn>
+        <v-btn
+          color="gray"
+          @click="dialog = false"
+        >
+          Cancelar
+        </v-btn>
+        <v-btn
+          color="primary"
+          @click="saveFacility"
+        >
+          Salvar
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script>
+<script lang="ts">
 import {ref, computed} from "vue";
 
 export default {
