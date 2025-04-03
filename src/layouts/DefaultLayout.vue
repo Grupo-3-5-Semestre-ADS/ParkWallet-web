@@ -1,28 +1,30 @@
 <template>
   <v-app>
-    <!-- AppBar -->
     <v-app-bar
       color="primary"
       app
     >
-      <v-btn
-        icon
-        @click="drawer = !drawer"
-      >
-        <v-icon>mdi-menu</v-icon>
-      </v-btn>
-      <v-app-bar-title>ParkWallet</v-app-bar-title>
+      <template #prepend>
+        <v-btn
+          icon
+          @click="drawer = !drawer"
+        >
+          <v-icon>mdi-menu</v-icon>
+        </v-btn>
+      </template>
+
       <v-spacer />
+
       <v-img
-        src="../assets/itaipuland-logo.png"
+        src="../assets/itaipuland-logo-white.png"
         alt="Logo"
         class="logo-img"
-        height="40"
+        max-height="60"
+        max-width="150"
         contain
       />
     </v-app-bar>
 
-    <!-- Sidebar -->
     <v-navigation-drawer
       v-model="drawer"
       app
@@ -89,5 +91,15 @@ const drawer = ref(false);
   overflow: auto;
   padding: 20px;
   border-radius: 8px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  max-height: 60px;
+  width: auto;
 }
 </style>
