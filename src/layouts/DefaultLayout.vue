@@ -12,6 +12,14 @@
         <v-icon>mdi-menu</v-icon>
       </v-btn>
       <v-app-bar-title>ParkWallet</v-app-bar-title>
+      <v-spacer />
+      <v-img
+        src="../assets/itaipuland-logo.png"
+        alt="Logo"
+        class="logo-img"
+        height="40"
+        contain
+      />
     </v-app-bar>
 
     <!-- Sidebar -->
@@ -20,16 +28,28 @@
       app
     >
       <v-list>
-        <v-list-item to="/facilities">
+        <v-list-item
+          to="/facilities"
+          prepend-icon="mdi-store"
+        >
           Estabelecimentos
         </v-list-item>
-        <v-list-item to="/products">
+        <v-list-item
+          to="/products"
+          prepend-icon="mdi-package-variant"
+        >
           Produtos
         </v-list-item>
-        <v-list-item to="/clients">
+        <v-list-item
+          to="/clients"
+          prepend-icon="mdi-account-group"
+        >
           Clientes
         </v-list-item>
-        <v-list-item to="/support">
+        <v-list-item
+          to="/support"
+          prepend-icon="mdi-lifebuoy"
+        >
           Suporte a clientes
         </v-list-item>
       </v-list>
