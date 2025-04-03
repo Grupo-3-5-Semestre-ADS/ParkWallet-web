@@ -4,10 +4,20 @@
       color="primary"
       app
     >
+      <v-btn
+        icon
+        @click="drawer = !drawer"
+      >
+        <v-icon>mdi-menu</v-icon>
+      </v-btn>
+
       <v-app-bar-title>ParkWallet</v-app-bar-title>
     </v-app-bar>
 
-    <v-navigation-drawer app>
+    <v-navigation-drawer
+      v-model="drawer"
+      app
+    >
       <v-list>
         <v-list-item to="/facilities">
           Estabelecimentos
@@ -24,7 +34,6 @@
       </v-list>
     </v-navigation-drawer>
 
-
     <v-main class="main-container">
       <v-container
         fluid
@@ -35,7 +44,11 @@
     </v-main>
   </v-app>
 </template>
+
 <script setup lang="ts">
+import {ref} from "vue";
+
+const drawer = ref(false);
 </script>
 
 <style scoped>
