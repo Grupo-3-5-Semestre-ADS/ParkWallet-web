@@ -10,13 +10,13 @@
     <v-navigation-drawer app>
       <v-list>
         <v-list-item to="/facilities">
-          Facilities
+          Estabelecimentos
         </v-list-item>
         <v-list-item to="/products">
-          Products
+          Produtos
         </v-list-item>
         <v-list-item to="/clients">
-          Clients
+          Clientes
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
