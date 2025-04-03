@@ -1,8 +1,4 @@
-/**
- * plugins/vuetify.ts
- *
- * Framework documentation: https://vuetifyjs.com`
- */
+// plugins/vuetify.ts
 
 // Styles
 import '@mdi/font/css/materialdesignicons.css'
@@ -15,5 +11,18 @@ import { createVuetify } from 'vuetify'
 export default createVuetify({
   theme: {
     defaultTheme: 'light',
+    themes: {
+      light: {
+        colors: {
+          primary: '#14517e',
+          secondary: '#3B7098',
+          accent: '#C34744',
+          error: '#C34744',
+          info: '#2196F3',
+          success: '#118418',
+          warning: '#FFC107',
+        },
+      },
+    },
   },
 })
