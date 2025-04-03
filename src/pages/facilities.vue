@@ -1,7 +1,7 @@
 <template>
   <v-container
     fluid
-    class="page-container"
+    class="page-container rounded elevation-4"
   >
     <v-row class="align-center mb-4 flex-grow-0">
       <v-col cols="6">
@@ -33,7 +33,7 @@
         :items="filteredFacilities"
         :headers="headers"
         items-per-page="5"
-        class="full-height"
+        class="full-height transparent-background"
       >
         <template #[`item.actions`]="{ item }">
           <v-btn
@@ -197,6 +197,7 @@ export default {
 .page-container {
   display: flex;
   flex-direction: column;
+  background: rgba(255, 255, 255, 0.9);
   height: 100%;
 }
 
@@ -206,5 +207,9 @@ export default {
 
 .full-height {
   height: 100%;
+}
+
+.transparent-background {
+  background-color: transparent;
 }
 </style>

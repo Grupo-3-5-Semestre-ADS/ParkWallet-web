@@ -1,5 +1,6 @@
 <template>
   <v-app>
+    <!-- AppBar -->
     <v-app-bar
       color="primary"
       app
@@ -10,10 +11,10 @@
       >
         <v-icon>mdi-menu</v-icon>
       </v-btn>
-
       <v-app-bar-title>ParkWallet</v-app-bar-title>
     </v-app-bar>
 
+    <!-- Sidebar -->
     <v-navigation-drawer
       v-model="drawer"
       app
@@ -34,7 +35,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-main class="main-container">
+    <v-main class="background-container">
       <v-container
         fluid
         class="content-container"
@@ -52,14 +53,21 @@ const drawer = ref(false);
 </script>
 
 <style scoped>
-.main-container {
+.background-container {
   display: flex;
   flex-direction: column;
   height: 100%;
+  background-image: url("../assets/background.svg");
+  background-size: auto 50vh;
+  background-position: bottom right;
+  background-repeat: no-repeat;
+  min-height: 100vh;
 }
 
 .content-container {
   flex: 1;
   overflow: auto;
+  padding: 20px;
+  border-radius: 8px;
 }
 </style>
