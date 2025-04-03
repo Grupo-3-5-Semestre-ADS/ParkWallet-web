@@ -4,7 +4,7 @@
       color="primary"
       app
     >
-      <v-app-bar-title>Minha Plataforma</v-app-bar-title>
+      <v-app-bar-title>ParkWallet</v-app-bar-title>
     </v-app-bar>
 
     <v-navigation-drawer app>
