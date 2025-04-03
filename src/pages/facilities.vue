@@ -7,7 +7,7 @@
       <v-col cols="6">
         <v-text-field
           v-model="search"
-          label="Buscar Facility"
+          label="Buscar Estabelecimento"
           variant="outlined"
           density="compact"
           clearable
@@ -23,7 +23,7 @@
           size="large"
           @click="openDialog"
         >
-          Adicionar Facility
+          Adicionar Estabelecimento
         </v-btn>
       </v-col>
     </v-row>
@@ -62,7 +62,7 @@
       max-width="500px"
     >
       <v-card>
-        <v-card-title>{{ editMode ? 'Editar Facility' : 'Adicionar Facility' }}</v-card-title>
+        <v-card-title>{{ editMode ? 'Editar Estabelecimento' : 'Adicionar Estabelecimento' }}</v-card-title>
         <v-card-text>
           <v-text-field
             v-model="facility.name"

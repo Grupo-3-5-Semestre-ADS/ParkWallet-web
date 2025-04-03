@@ -18,6 +18,9 @@
         <v-list-item to="/clients">
           Clientes
         </v-list-item>
+        <v-list-item to="/support">
+          Suporte a clientes
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
 
