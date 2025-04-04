@@ -12,11 +12,20 @@
         sm="8"
         md="4"
       >
-        <v-card class="pa-6">
+        <v-card
+          class="pa-6"
+          elevation="6"
+        >
+          <v-img
+            src="../assets/itaipuland-logo.png"
+            alt="Logo"
+            contain
+            class="mb-4"
+            max-height="150"
+          />
           <v-card-title class="text-h5">
             Login
           </v-card-title>
-
           <v-card-text>
             <v-form @submit.prevent="handleSubmit">
               <v-text-field
@@ -39,6 +48,7 @@
                 block
                 class="mt-4"
                 :disabled="!email || !password"
+                to="/facilities"
               >
                 Entrar
               </v-btn>
@@ -50,7 +60,7 @@
   </v-container>
 </template>
 
-<script>
+<script lang="ts">
 import {ref} from 'vue'
 
 export default {
