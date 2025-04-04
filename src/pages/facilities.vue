@@ -58,10 +58,13 @@
 
     <v-dialog
       v-model="dialog"
-      max-width="500px"
+      persistent
+      max-width="800px"
     >
       <v-card>
-        <v-card-title>{{ editMode ? 'Editar Estabelecimento' : 'Adicionar Estabelecimento' }}</v-card-title>
+        <v-card-title>
+          {{ editMode ? "Editar Estabelecimento" : "Adicionar Estabelecimento" }}
+        </v-card-title>
         <v-card-text>
           <v-text-field
             v-model="facility.name"
@@ -93,7 +96,7 @@
         <v-card-actions>
           <v-btn
             color="gray"
-            @click="dialog = false"
+            @click="confirmClose = true"
           >
             Cancelar
           </v-btn>
@@ -106,17 +109,27 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <ConfirmDialog
+      v-model="confirmClose"
+      title="Confirmar saída"
+      message="Tem certeza que deseja sair sem salvar?"
+      @confirm="dialog = false"
+    />
   </v-container>
 </template>
 
 <script lang="ts">
 import {ref, computed} from "vue";
+import ConfirmDialog from "@/components/ConfirmDialog.vue";
 
 export default {
   name: "FacilitiesPage",
+  components: {ConfirmDialog},
   setup() {
     const search = ref("");
     const dialog = ref(false);
+    const confirmClose = ref(false);
     const editMode = ref(false);
     const facility = ref({id: null, name: "", description: "", type: "", latitude: "", longitude: ""});
 
@@ -178,6 +191,7 @@ export default {
     return {
       search,
       dialog,
+      confirmClose,
       facility,
       facilities,
       headers,
