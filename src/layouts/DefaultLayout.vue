@@ -7,7 +7,7 @@
       <template #prepend>
         <v-btn
           icon
-          @click="drawer = !drawer"
+          @click="toggleDrawer"
         >
           <v-icon>mdi-menu</v-icon>
         </v-btn>
@@ -27,9 +27,23 @@
 
     <v-navigation-drawer
       v-model="drawer"
+      :rail="!expanded && !isMobile"
+      :temporary="isMobile"
       app
+      class="d-flex flex-column h-100"
     >
       <v-list>
+        <v-list-item
+          prepend-avatar="https://randomuser.me/api/portraits/men/85.jpg"
+          subtitle="user1@gmailcom"
+          title="User 1"
+        />
+      </v-list>
+      <v-divider />
+      <v-list
+        nav
+        density="comfortable"
+      >
         <v-list-item
           to="/facilities"
           prepend-icon="mdi-store"
@@ -52,7 +66,15 @@
           to="/support"
           prepend-icon="mdi-lifebuoy"
         >
-          Suporte a clientes
+          Suporte
+        </v-list-item>
+        <v-list-item to="/login">
+          <template #prepend>
+            <v-icon color="error">
+              mdi-logout
+            </v-icon>
+          </template>
+          Sair
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
@@ -69,9 +91,24 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
+import {ref, computed} from "vue";
+import {useDisplay} from "vuetify";
 
-const drawer = ref(false);
+const drawer = ref(true);
+const expanded = ref(false);
+
+// Detecta se está em tela pequena
+const {mdAndDown} = useDisplay();
+const isMobile = computed(() => mdAndDown.value);
+
+// Função de toggle inteligente
+const toggleDrawer = () => {
+  if (isMobile.value) {
+    drawer.value = !drawer.value;
+  } else {
+    expanded.value = !expanded.value;
+  }
+};
 </script>
 
 <style scoped>
@@ -91,11 +128,6 @@ const drawer = ref(false);
   overflow: auto;
   padding: 20px;
   border-radius: 8px;
-}
-
-.logo-container {
-  display: flex;
-  align-items: center;
 }
 
 .logo-img {
