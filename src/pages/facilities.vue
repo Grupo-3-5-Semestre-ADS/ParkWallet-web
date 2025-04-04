@@ -20,8 +20,6 @@
       >
         <v-btn
           color="primary"
-          rounded
-          size="large"
           @click="openDialog"
         >
           Adicionar Estabelecimento
