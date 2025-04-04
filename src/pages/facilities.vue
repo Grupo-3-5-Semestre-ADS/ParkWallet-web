@@ -159,8 +159,8 @@ export default {
         name: "Shopping C",
         description: "Centro Comercial",
         type: "Shopping",
-        latitude: -23.56,
-        longitude: -46.65
+        latitude: -24.61748223335819,
+        longitude: -53.70975730405071
       }
     ]);
 
