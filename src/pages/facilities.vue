@@ -48,9 +48,18 @@
             icon
             color="red"
             size="x-small"
+            class="mr-2"
             @click="deleteFacility(item)"
           >
             <v-icon>mdi-delete</v-icon>
+          </v-btn>
+          <v-btn
+            icon
+            color="green"
+            size="x-small"
+            @click="openMap(item)"
+          >
+            <v-icon>mdi-map-marker</v-icon>
           </v-btn>
         </template>
       </v-data-table>
@@ -116,21 +125,30 @@
       message="Tem certeza que deseja sair sem salvar?"
       @confirm="dialog = false"
     />
+
+    <MapDialog
+      v-model="showMapDialog"
+      :latitude="selectedCoords.latitude"
+      :longitude="selectedCoords.longitude"
+    />
   </v-container>
 </template>
 
 <script lang="ts">
 import {ref, computed} from "vue";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
+import MapDialog from "@/components/MapDialog.vue";
 
 export default {
   name: "FacilitiesPage",
-  components: {ConfirmDialog},
+  components: {MapDialog, ConfirmDialog},
   setup() {
     const search = ref("");
     const dialog = ref(false);
     const confirmClose = ref(false);
     const editMode = ref(false);
+    const showMapDialog = ref(false);
+    const selectedCoords = ref({latitude: 0, longitude: 0});
     const facility = ref({id: null, name: "", description: "", type: "", latitude: "", longitude: ""});
 
     const facilities = ref([
@@ -188,10 +206,17 @@ export default {
       facilities.value = facilities.value.filter(f => f.id !== item.id);
     };
 
+    const openMap = (item) => {
+      selectedCoords.value = {latitude: item.latitude, longitude: item.longitude};
+      showMapDialog.value = true;
+    };
+
     return {
       search,
       dialog,
       confirmClose,
+      showMapDialog,
+      selectedCoords,
       facility,
       facilities,
       headers,
@@ -200,6 +225,7 @@ export default {
       editFacility,
       saveFacility,
       deleteFacility,
+      openMap,
       editMode
     };
   }
