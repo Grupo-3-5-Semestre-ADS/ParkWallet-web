@@ -120,7 +120,7 @@
 import {ref, computed} from "vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import CreateOrEditFacilities from "@/components/dialogs/CreateOrEditFacilities.vue";
-import MapDialog from "@/components/MapDialog.vue";
+import MapDialog from "@/components/dialogs/MapDialog.vue";
 
 export default {
   name: "FacilitiesPage",
