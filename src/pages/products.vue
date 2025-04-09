@@ -14,13 +14,13 @@
       @map="openMap"
     />
 
-    <!--    <CreateOrEditFacilities-->
-    <!--      v-model="dialog"-->
-    <!--      :product="product"-->
-    <!--      :editMode="editMode"-->
-    <!--      @save="onSaveProduct"-->
-    <!--      @cancel="confirmClose = true"-->
-    <!--    />-->
+    <CreateOrEditProducts
+      v-model="dialog"
+      :product="product"
+      :editMode="editMode"
+      @save="onSaveProduct"
+      @cancel="confirmClose = true"
+    />
 
     <ConfirmDialog
       v-model="confirmClose"
@@ -34,13 +34,13 @@
 <script lang="ts">
 import {ref} from "vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
-import CreateOrEditFacilities from "@/components/dialogs/CreateOrEditFacilities.vue";
+import CreateOrEditProducts from "@/components/dialogs/CreateOrEditProducts.vue";
 import MapDialog from "@/components/dialogs/MapDialog.vue";
 import DefaultTable from "@/components/DefaultTable.vue";
 
 export default {
   name: "ProductsPage",
-  components: {DefaultTable, MapDialog, ConfirmDialog, CreateOrEditFacilities},
+  components: {DefaultTable, MapDialog, ConfirmDialog, CreateOrEditProducts},
   setup() {
     const search = ref("");
     const dialog = ref(false);
@@ -87,7 +87,7 @@ export default {
     ];
 
     const openDialog = () => {
-      product.value = {id: null, name: "", description: "", type: "", latitude: "", longitude: ""};
+      product.value = {id: null, name: "", description: "", value: 0};
       editMode.value = false;
       dialog.value = true;
     };
