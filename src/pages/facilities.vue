@@ -119,6 +119,14 @@
       </v-card>
     </v-dialog>
 
+    <CreateOrEditFacilities
+      v-model="dialog"
+      :facility="facility"
+      :editMode="editMode"
+      @save="onSaveFacility"
+      @cancel="confirmClose = true"
+    />
+
     <ConfirmDialog
       v-model="confirmClose"
       title="Confirmar saída"
@@ -136,12 +144,13 @@
 
 <script lang="ts">
 import {ref, computed} from "vue";
-import ConfirmDialog from "@/components/ConfirmDialog.vue";
+import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
+import CreateOrEditFacilities from "@/components/dialogs/CreateOrEditFacilities.vue";
 import MapDialog from "@/components/MapDialog.vue";
 
 export default {
   name: "FacilitiesPage",
-  components: {MapDialog, ConfirmDialog},
+  components: {MapDialog, ConfirmDialog, CreateOrEditFacilities},
   setup() {
     const search = ref("");
     const dialog = ref(false);
@@ -191,13 +200,13 @@ export default {
       dialog.value = true;
     };
 
-    const saveFacility = () => {
+    const onSaveFacility = (data) => {
       if (editMode.value) {
-        const index = facilities.value.findIndex(f => f.id === facility.value.id);
-        facilities.value[index] = {...facility.value};
+        const index = facilities.value.findIndex(f => f.id === data.id);
+        facilities.value[index] = {...data};
       } else {
-        facility.value.id = facilities.value.length + 1;
-        facilities.value.push({...facility.value});
+        data.id = facilities.value.length + 1;
+        facilities.value.push({...data});
       }
       dialog.value = false;
     };
@@ -223,7 +232,7 @@ export default {
       filteredFacilities,
       openDialog,
       editFacility,
-      saveFacility,
+      onSaveFacility,
       deleteFacility,
       openMap,
       editMode
