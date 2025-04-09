@@ -60,11 +60,11 @@
           to="/users"
           prepend-icon="mdi-account-group"
         >
-          Clientes
+          Usuários
         </v-list-item>
         <v-list-item
           to="/support"
-          prepend-icon="mdi-lifebuoy"
+          prepend-icon="mdi-chat"
         >
           Suporte
         </v-list-item>
