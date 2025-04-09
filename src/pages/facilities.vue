@@ -35,89 +35,63 @@
         class="full-height transparent-background"
       >
         <template #[`item.actions`]="{ item }">
-          <v-btn
-            icon
-            color="blue"
-            size="x-small"
-            class="mr-2"
-            @click="editFacility(item)"
+          <v-tooltip text="Editar">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                v-bind="props"
+                icon
+                color="blue"
+                size="x-small"
+                class="mr-2"
+                @click="editFacility(item)"
+              >
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
+
+          <v-tooltip :text="item.active ? 'Desativar' : 'Ativar'">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                v-bind="props"
+                icon
+                :color="item.active ? 'orange' : 'green'"
+                size="x-small"
+                class="mr-2"
+                @click="toggleActive(item)"
+              >
+                <v-icon>{{ item.active ? 'mdi-cancel' : 'mdi-check-circle' }}</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
+
+          <v-tooltip text="Abrir no Mapa">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                v-bind="props"
+                icon
+                color="green"
+                size="x-small"
+                @click="openMap(item)"
+              >
+                <v-icon>mdi-map-marker</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
+        </template>
+
+        <template #[`item.active`]="{ item }">
+          <v-chip
+            :color="item.active ? 'green' : 'red'"
+            text-color="white"
+            small
+            label
           >
-            <v-icon>mdi-pencil</v-icon>
-          </v-btn>
-          <v-btn
-            icon
-            color="red"
-            size="x-small"
-            class="mr-2"
-            @click="deleteFacility(item)"
-          >
-            <v-icon>mdi-delete</v-icon>
-          </v-btn>
-          <v-btn
-            icon
-            color="green"
-            size="x-small"
-            @click="openMap(item)"
-          >
-            <v-icon>mdi-map-marker</v-icon>
-          </v-btn>
+            {{ item.active ? 'Ativo' : 'Inativo' }}
+          </v-chip>
         </template>
       </v-data-table>
     </v-row>
-
-    <v-dialog
-      v-model="dialog"
-      persistent
-      max-width="800px"
-    >
-      <v-card>
-        <v-card-title>
-          {{ editMode ? "Editar Estabelecimento" : "Adicionar Estabelecimento" }}
-        </v-card-title>
-        <v-card-text>
-          <v-text-field
-            v-model="facility.name"
-            label="Nome"
-            required
-          />
-          <v-text-field
-            v-model="facility.description"
-            label="Descrição"
-          />
-          <v-text-field
-            v-model="facility.type"
-            label="Tipo"
-            required
-          />
-          <v-text-field
-            v-model="facility.latitude"
-            label="Latitude"
-            type="number"
-            required
-          />
-          <v-text-field
-            v-model="facility.longitude"
-            label="Longitude"
-            type="number"
-            required
-          />
-        </v-card-text>
-        <v-card-actions>
-          <v-btn
-            color="gray"
-            @click="confirmClose = true"
-          >
-            Cancelar
-          </v-btn>
-          <v-btn
-            color="primary"
-            @click="saveFacility"
-          >
-            Salvar
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
 
     <CreateOrEditFacilities
       v-model="dialog"
@@ -161,15 +135,32 @@ export default {
     const facility = ref({id: null, name: "", description: "", type: "", latitude: "", longitude: ""});
 
     const facilities = ref([
-      {id: 1, name: "Hospital A", description: "Emergência 24h", type: "Hospital", latitude: -23.55, longitude: -46.63},
-      {id: 2, name: "Escola B", description: "Ensino Fundamental", type: "Escola", latitude: -22.90, longitude: -47.06},
+      {
+        id: 1,
+        name: "Hospital A",
+        description: "Emergência 24h",
+        type: "Hospital",
+        latitude: -23.55,
+        longitude: -46.63,
+        active: true
+      },
+      {
+        id: 2,
+        name: "Escola B",
+        description: "Ensino Fundamental",
+        type: "Escola",
+        latitude: -22.90,
+        longitude: -47.06,
+        active: true
+      },
       {
         id: 3,
         name: "Shopping C",
         description: "Centro Comercial",
         type: "Shopping",
         latitude: -24.61748223335819,
-        longitude: -53.70975730405071
+        longitude: -53.70975730405071,
+        active: true
       }
     ]);
 
@@ -179,6 +170,7 @@ export default {
       {title: "Tipo", key: "type"},
       {title: "Latitude", key: "latitude"},
       {title: "Longitude", key: "longitude"},
+      {title: "Ativo", key: "active"},
       {title: "Ações", key: "actions", sortable: false}
     ];
 
@@ -211,8 +203,11 @@ export default {
       dialog.value = false;
     };
 
-    const deleteFacility = (item) => {
-      facilities.value = facilities.value.filter(f => f.id !== item.id);
+    const toggleActive = (item) => {
+      const facilityToUpdate = facilities.value.find(f => f.id === item.id);
+      if (facilityToUpdate) {
+        facilityToUpdate.active = !facilityToUpdate.active;
+      }
     };
 
     const openMap = (item) => {
@@ -233,7 +228,7 @@ export default {
       openDialog,
       editFacility,
       onSaveFacility,
-      deleteFacility,
+      toggleActive,
       openMap,
       editMode
     };
