@@ -57,7 +57,7 @@
           Produtos
         </v-list-item>
         <v-list-item
-          to="/clients"
+          to="/users"
           prepend-icon="mdi-account-group"
         >
           Clientes

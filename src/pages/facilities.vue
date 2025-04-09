@@ -3,95 +3,17 @@
     fluid
     class="page-container rounded elevation-4"
   >
-    <v-row class="align-center mb-4 flex-grow-0">
-      <v-col cols="6">
-        <v-text-field
-          v-model="search"
-          label="Buscar Estabelecimento"
-          variant="outlined"
-          density="compact"
-          clearable
-          hide-details
-        />
-      </v-col>
-      <v-col
-        cols="6"
-        class="text-right"
-      >
-        <v-btn
-          color="primary"
-          @click="openDialog"
-        >
-          Adicionar Estabelecimento
-        </v-btn>
-      </v-col>
-    </v-row>
-
-    <v-row class="flex-grow-1 overflow-auto">
-      <v-data-table
-        :items="filteredFacilities"
-        :headers="headers"
-        items-per-page="5"
-        class="full-height transparent-background"
-      >
-        <template #[`item.actions`]="{ item }">
-          <v-tooltip text="Editar">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon
-                color="blue"
-                size="x-small"
-                class="mr-2"
-                @click="editFacility(item)"
-              >
-                <v-icon>mdi-pencil</v-icon>
-              </v-btn>
-            </template>
-          </v-tooltip>
-
-          <v-tooltip :text="item.active ? 'Desativar' : 'Ativar'">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon
-                :color="item.active ? 'orange' : 'green'"
-                size="x-small"
-                class="mr-2"
-                @click="toggleActive(item)"
-              >
-                <v-icon>{{ item.active ? 'mdi-cancel' : 'mdi-check-circle' }}</v-icon>
-              </v-btn>
-            </template>
-          </v-tooltip>
-
-          <v-tooltip text="Abrir no Mapa">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon
-                color="green"
-                size="x-small"
-                @click="openMap(item)"
-              >
-                <v-icon>mdi-map-marker</v-icon>
-              </v-btn>
-            </template>
-          </v-tooltip>
-        </template>
-
-        <template #[`item.active`]="{ item }">
-          <v-chip
-            :color="item.active ? 'green' : 'red'"
-            text-color="white"
-            small
-            label
-          >
-            {{ item.active ? 'Ativo' : 'Inativo' }}
-          </v-chip>
-        </template>
-      </v-data-table>
-    </v-row>
+    <DefaultTable
+      search-placeholder="Buscar Estabelecimento"
+      add-button-text="Adicionar Estabelecimento"
+      :table-items="facilities"
+      :headers="headers"
+      show-map-button
+      @add="openDialog"
+      @edit="editFacility"
+      @toggle="toggleActive"
+      @map="openMap"
+    />
 
     <CreateOrEditFacilities
       v-model="dialog"
@@ -121,10 +43,11 @@ import {ref, computed} from "vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import CreateOrEditFacilities from "@/components/dialogs/CreateOrEditFacilities.vue";
 import MapDialog from "@/components/dialogs/MapDialog.vue";
+import DefaultTable from "@/components/DefaultTable.vue";
 
 export default {
   name: "FacilitiesPage",
-  components: {MapDialog, ConfirmDialog, CreateOrEditFacilities},
+  components: {DefaultTable, MapDialog, ConfirmDialog, CreateOrEditFacilities},
   setup() {
     const search = ref("");
     const dialog = ref(false);
@@ -174,12 +97,6 @@ export default {
       {title: "Ações", key: "actions", sortable: false}
     ];
 
-    const filteredFacilities = computed(() =>
-      facilities.value.filter(f =>
-        f.name.toLowerCase().includes(search.value.toLowerCase())
-      )
-    );
-
     const openDialog = () => {
       facility.value = {id: null, name: "", description: "", type: "", latitude: "", longitude: ""};
       editMode.value = false;
@@ -224,7 +141,6 @@ export default {
       facility,
       facilities,
       headers,
-      filteredFacilities,
       openDialog,
       editFacility,
       onSaveFacility,
