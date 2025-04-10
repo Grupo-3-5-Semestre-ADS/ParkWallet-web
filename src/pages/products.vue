@@ -11,13 +11,12 @@
       @add="openDialog"
       @edit="editProduct"
       @toggle="toggleActive"
-      @map="openMap"
     />
 
     <CreateOrEditProducts
       v-model="dialog"
       :product="product"
-      :editMode="editMode"
+      :edit-mode="editMode"
       @save="onSaveProduct"
       @cancel="confirmClose = true"
     />
@@ -35,19 +34,16 @@
 import {ref} from "vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import CreateOrEditProducts from "@/components/dialogs/CreateOrEditProducts.vue";
-import MapDialog from "@/components/dialogs/MapDialog.vue";
 import DefaultTable from "@/components/DefaultTable.vue";
 
 export default {
   name: "ProductsPage",
-  components: {DefaultTable, MapDialog, ConfirmDialog, CreateOrEditProducts},
+  components: {DefaultTable, ConfirmDialog, CreateOrEditProducts},
   setup() {
     const search = ref("");
     const dialog = ref(false);
     const confirmClose = ref(false);
     const editMode = ref(false);
-    const showMapDialog = ref(false);
-    const selectedCoords = ref({latitude: 0, longitude: 0});
     const product = ref({id: null, name: "", description: "", type: "", latitude: "", longitude: ""});
 
     const products = ref([
@@ -116,17 +112,10 @@ export default {
       }
     };
 
-    const openMap = (item) => {
-      selectedCoords.value = {latitude: item.latitude, longitude: item.longitude};
-      showMapDialog.value = true;
-    };
-
     return {
       search,
       dialog,
       confirmClose,
-      showMapDialog,
-      selectedCoords,
       product,
       products,
       headers,
@@ -134,7 +123,6 @@ export default {
       editProduct,
       onSaveProduct,
       toggleActive,
-      openMap,
       editMode
     };
   }
@@ -147,17 +135,5 @@ export default {
   flex-direction: column;
   background: rgba(255, 255, 255, 0.9);
   height: 100%;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.full-height {
-  height: 100%;
-}
-
-.transparent-background {
-  background-color: transparent;
 }
 </style>

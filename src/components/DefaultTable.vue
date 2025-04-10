@@ -3,7 +3,7 @@
     <v-col cols="6">
       <v-text-field
         v-model="search"
-        label="Buscar Estabelecimento"
+        :label="searchPlaceholder"
         variant="outlined"
         density="compact"
         clearable
@@ -32,7 +32,7 @@
     >
       <template #[`item.actions`]="{ item }">
         <v-tooltip text="Editar">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <v-btn
               v-bind="props"
               icon
@@ -47,7 +47,7 @@
         </v-tooltip>
 
         <v-tooltip :text="item.active ? 'Desativar' : 'Ativar'">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <v-btn
               v-bind="props"
               icon
@@ -61,8 +61,11 @@
           </template>
         </v-tooltip>
 
-        <v-tooltip v-if="showMapButton" text="Abrir no Mapa">
-          <template v-slot:activator="{ props }">
+        <v-tooltip
+          v-if="showMapButton"
+          text="Abrir no Mapa"
+        >
+          <template #activator="{ props }">
             <v-btn
               v-bind="props"
               icon

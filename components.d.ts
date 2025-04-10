@@ -10,6 +10,7 @@ declare module 'vue' {
     ConfirmDialog: typeof import('./src/components/dialogs/ConfirmDialog.vue')['default']
     CreateOrEditFacilities: typeof import('./src/components/dialogs/CreateOrEditFacilities.vue')['default']
     CreateOrEditProducts: typeof import('./src/components/dialogs/CreateOrEditProducts.vue')['default']
+    CreateOrEditUsers: typeof import('./src/components/dialogs/CreateOrEditUsers.vue')['default']
     DefaultTable: typeof import('./src/components/DefaultTable.vue')['default']
     MapDialog: typeof import('./src/components/dialogs/MapDialog.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

@@ -18,7 +18,7 @@
     <CreateOrEditFacilities
       v-model="dialog"
       :facility="facility"
-      :editMode="editMode"
+      :edit-mode="editMode"
       @save="onSaveFacility"
       @cancel="confirmClose = true"
     />
@@ -158,17 +158,5 @@ export default {
   flex-direction: column;
   background: rgba(255, 255, 255, 0.9);
   height: 100%;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.full-height {
-  height: 100%;
-}
-
-.transparent-background {
-  background-color: transparent;
 }
 </style>

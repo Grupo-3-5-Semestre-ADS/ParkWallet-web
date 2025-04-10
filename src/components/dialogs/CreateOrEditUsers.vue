@@ -11,18 +11,23 @@
       </v-card-title>
       <v-card-text>
         <v-text-field
-          v-model="localProduct.name"
+          v-model="localUser.name"
           label="Nome"
           required
         />
         <v-text-field
-          v-model="localProduct.description"
+          v-model="localUser.cpf"
           label="Descrição"
         />
         <v-text-field
-          v-model="localProduct.value"
+          v-model="localUser.email"
           label="Valor"
-          type="number"
+          required
+        />
+        <v-text-field
+          v-model="localUser.birthDate"
+          label="Valor"
+          type="date"
           required
         />
       </v-card-text>
@@ -49,19 +54,19 @@ import {reactive, watch} from "vue";
 
 const props = defineProps<{
   modelValue: boolean;
-  product: any;
+  user: any;
   editMode: boolean;
 }>();
 
 const emit = defineEmits(["update:modelValue", "save", "cancel"]);
 
-const localProduct = reactive({...props.product});
+const localUser = reactive({...props.user});
 
-watch(() => props.product, (newVal) => {
-  Object.assign(localProduct, newVal);
+watch(() => props.user, (newVal) => {
+  Object.assign(localUser, newVal);
 }, {deep: true});
 
 const emitSave = () => {
-  emit("save", {...localProduct});
+  emit("save", {...localUser});
 };
 </script>
