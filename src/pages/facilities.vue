@@ -39,11 +39,13 @@
 </template>
 
 <script lang="ts">
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import CreateOrEditFacilities from "@/components/dialogs/CreateOrEditFacilities.vue";
 import MapDialog from "@/components/dialogs/MapDialog.vue";
 import DefaultTable from "@/components/DefaultTable.vue";
+import {getFacilities, toggleFacilityActive} from '@/services/facilitiesService.js';
+import {HttpStatusCode} from "axios";
 
 export default {
   name: "FacilitiesPage",
@@ -58,7 +60,7 @@ export default {
     const facility = ref({id: null, name: "", description: "", type: "", latitude: "", longitude: ""});
 
     const facilities = ref([
-      {
+      /* {
         id: 1,
         name: "Hospital A",
         description: "Emergência 24h",
@@ -84,7 +86,7 @@ export default {
         latitude: -24.61748223335819,
         longitude: -53.70975730405071,
         active: true
-      }
+      } */
     ]);
 
     const headers = [
@@ -93,9 +95,18 @@ export default {
       {title: "Tipo", key: "type"},
       {title: "Latitude", key: "latitude"},
       {title: "Longitude", key: "longitude"},
-      {title: "Ativo", key: "active"},
+      {title: "Ativo", key: "inactive"},
       {title: "Ações", key: "actions", sortable: false}
     ];
+
+    const getData = async () => {
+      try {
+        const res = await getFacilities();
+        facilities.value.push(...res.data);
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+      }
+    };
 
     const openDialog = () => {
       facility.value = {id: null, name: "", description: "", type: "", latitude: "", longitude: ""};
@@ -120,10 +131,13 @@ export default {
       dialog.value = false;
     };
 
-    const toggleActive = (item) => {
+    const toggleActive = async (item) => {
       const facilityToUpdate = facilities.value.find(f => f.id === item.id);
       if (facilityToUpdate) {
-        facilityToUpdate.active = !facilityToUpdate.active;
+        const statusCode = await toggleFacilityActive(facilityToUpdate.id);
+        if (statusCode === 200) {
+          facilityToUpdate.inactive = !facilityToUpdate.inactive;
+        }
       }
     };
 
@@ -131,6 +145,10 @@ export default {
       selectedCoords.value = {latitude: item.latitude, longitude: item.longitude};
       showMapDialog.value = true;
     };
+
+    onMounted(() => {
+      getData();
+    });
 
     return {
       search,

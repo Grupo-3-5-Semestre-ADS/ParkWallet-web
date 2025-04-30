@@ -46,17 +46,17 @@
           </template>
         </v-tooltip>
 
-        <v-tooltip :text="item.active ? 'Desativar' : 'Ativar'">
+        <v-tooltip :text="item.inactive ? 'Ativar' : 'Desativar'">
           <template #activator="{ props }">
             <v-btn
               v-bind="props"
               icon
-              :color="item.active ? 'orange' : 'green'"
+              :color="item.inactive ? 'green' : 'orange'"
               size="x-small"
               class="mr-2"
               @click="$emit('toggle', item)"
             >
-              <v-icon>{{ item.active ? 'mdi-cancel' : 'mdi-check-circle' }}</v-icon>
+              <v-icon>{{ item.inactive ? 'mdi-check-circle' : 'mdi-cancel' }}</v-icon>
             </v-btn>
           </template>
         </v-tooltip>
@@ -83,14 +83,14 @@
         {{ formatCurrency(item.value) }}
       </template>
 
-      <template #[`item.active`]="{ item }">
+      <template #[`item.inactive`]="{ item }">
         <v-chip
-          :color="item.active ? 'green' : 'red'"
+          :color="item.inactive ? 'red' : 'green'"
           text-color="white"
           small
           label
         >
-          {{ item.active ? 'Ativo' : 'Inativo' }}
+          {{ item.inactive ? 'Inativo' : 'Ativo' }}
         </v-chip>
       </template>
     </v-data-table>

@@ -78,7 +78,7 @@ export default {
       {title: "CPF", key: "cpf"},
       {title: "E-mail", key: "email"},
       {title: "Data de Nascimento", key: "birthDate"},
-      {title: "Ativo", key: "active"},
+      {title: "Ativo", key: "inactive"},
       {title: "Ações", key: "actions", sortable: false}
     ];
 
