@@ -44,7 +44,13 @@ import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import CreateOrEditFacilities from "@/components/dialogs/CreateOrEditFacilities.vue";
 import MapDialog from "@/components/dialogs/MapDialog.vue";
 import DefaultTable from "@/components/DefaultTable.vue";
-import {getFacilities, toggleFacilityActive} from '@/services/facilitiesService.js';
+import {
+  createFacility,
+  getFacilities,
+  getFacility,
+  toggleFacilityActive,
+  updateFacility
+} from '@/services/facilitiesService.js';
 import {HttpStatusCode} from "axios";
 
 export default {
@@ -120,13 +126,23 @@ export default {
       dialog.value = true;
     };
 
-    const onSaveFacility = (data) => {
+    const onSaveFacility = async (data) => {
       if (editMode.value) {
-        const index = facilities.value.findIndex(f => f.id === data.id);
-        facilities.value[index] = {...data};
+        const statusCode = await updateFacility(data.id, data);
+
+        if (statusCode === 200) {
+          const updatedFacility = await getFacility(data.id);
+          const index = facilities.value.findIndex(f => f.id === data.id);
+          facilities.value[index] = updatedFacility;
+        }
       } else {
-        data.id = facilities.value.length + 1;
-        facilities.value.push({...data});
+        const createdFacility = await createFacility(data);
+
+        console.log(createdFacility)
+
+        if (createdFacility) {
+          facilities.value.push(createdFacility);
+        }
       }
       dialog.value = false;
     };

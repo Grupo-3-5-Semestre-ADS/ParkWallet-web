@@ -21,13 +21,14 @@ export const getFacility = async (id) => {
 };
 
 export const createFacility = async (data) => {
+  console.log(data)
   const res = await api.post(collection, data);
   return res.data;
 };
 
 export const updateFacility = async (id, data) => {
   const res = await api.put(`${collection}/${id}`, data);
-  return res.data;
+  return res.status;
 };
 
 export const toggleFacilityActive = async (id) => {
