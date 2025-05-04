@@ -51,7 +51,6 @@ import {
   toggleFacilityActive,
   updateFacility
 } from '@/services/facilitiesService.js';
-import {HttpStatusCode} from "axios";
 
 export default {
   name: "FacilitiesPage",
@@ -65,35 +64,7 @@ export default {
     const selectedCoords = ref({latitude: 0, longitude: 0});
     const facility = ref({id: null, name: "", description: "", type: "", latitude: "", longitude: ""});
 
-    const facilities = ref([
-      /* {
-        id: 1,
-        name: "Hospital A",
-        description: "Emergência 24h",
-        type: "Hospital",
-        latitude: -23.55,
-        longitude: -46.63,
-        active: true
-      },
-      {
-        id: 2,
-        name: "Escola B",
-        description: "Ensino Fundamental",
-        type: "Escola",
-        latitude: -22.90,
-        longitude: -47.06,
-        active: true
-      },
-      {
-        id: 3,
-        name: "Shopping C",
-        description: "Centro Comercial",
-        type: "Shopping",
-        latitude: -24.61748223335819,
-        longitude: -53.70975730405071,
-        active: true
-      } */
-    ]);
+    const facilities = ref([]);
 
     const headers = [
       {title: "Nome", key: "name"},
@@ -138,10 +109,8 @@ export default {
       } else {
         const createdFacility = await createFacility(data);
 
-        console.log(createdFacility)
-
         if (createdFacility) {
-          facilities.value.push(createdFacility);
+          await getData();
         }
       }
       dialog.value = false;
