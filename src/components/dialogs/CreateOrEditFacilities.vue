@@ -19,8 +19,11 @@
           v-model="localFacility.description"
           label="Descrição"
         />
-        <v-text-field
+        <v-select
           v-model="localFacility.type"
+          :items="facilityTypes"
+          item-title="text"
+          item-value="value"
           label="Tipo"
           required
         />
@@ -67,6 +70,12 @@ const props = defineProps<{
 const emit = defineEmits(["update:modelValue", "save", "cancel"]);
 
 const localFacility = reactive({...props.facility});
+
+const facilityTypes = [
+  { text: 'Loja', value: 'store' },
+  { text: 'Atração', value: 'attraction' },
+  { text: 'Outro', value: 'other' }
+];
 
 watch(() => props.facility, (newVal) => {
   Object.assign(localFacility, newVal);
