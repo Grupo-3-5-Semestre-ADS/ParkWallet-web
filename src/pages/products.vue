@@ -31,10 +31,17 @@
 </template>
 
 <script lang="ts">
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import CreateOrEditProducts from "@/components/dialogs/CreateOrEditProducts.vue";
 import DefaultTable from "@/components/DefaultTable.vue";
+import {
+  createProduct,
+  getProduct,
+  getProducts,
+  toggleProductActive,
+  updateProduct
+} from "@/services/productsService.js";
 
 export default {
   name: "ProductsPage",
@@ -44,43 +51,27 @@ export default {
     const dialog = ref(false);
     const confirmClose = ref(false);
     const editMode = ref(false);
-    const product = ref({id: null, name: "", description: "", type: "", latitude: "", longitude: ""});
+    const product = ref({id: null, name: "", description: "", value: 0, facilityId: null});
 
-    const products = ref([
-      {
-        id: 1,
-        name: "Produto 1",
-        facilityName: "Estabelecimento 1",
-        description: "Emergência 24h",
-        value: 5.12,
-        active: true
-      },
-      {
-        id: 2,
-        name: "Produto 2",
-        facilityName: "Estabelecimento 1",
-        description: "Emergência 24h",
-        value: 10.00,
-        active: true
-      },
-      {
-        id: 3,
-        name: "Produto 3",
-        facilityName: "Estabelecimento 1",
-        description: "Emergência 24h",
-        value: 20.00,
-        active: true
-      },
-    ]);
+    const products = ref([]);
 
     const headers = [
       {title: "Nome", key: "name"},
-      {title: "Estabelecimento", key: "facilityName"},
+      {title: "Estabelecimento", key: "facilityId"},
       {title: "Descrição", key: "description"},
-      {title: "Valor", key: "value"},
-      {title: "Ativo", key: "active"},
+      {title: "Valor", key: "price"},
+      {title: "Ativo", key: "inactive"},
       {title: "Ações", key: "actions", sortable: false}
     ];
+
+    const getData = async () => {
+      try {
+        const res = await getProducts();
+        products.value.push(...res.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
     const openDialog = () => {
       product.value = {id: null, name: "", description: "", value: 0};
@@ -94,23 +85,38 @@ export default {
       dialog.value = true;
     };
 
-    const onSaveProduct = (data) => {
+    const onSaveProduct = async (data) => {
       if (editMode.value) {
-        const index = products.value.findIndex(f => f.id === data.id);
-        products.value[index] = {...data};
+        const statusCode = await updateProduct(data.id, data);
+
+        if (statusCode === 200) {
+          const updatedFacility = await getProduct(data.id);
+          const index = products.value.findIndex(f => f.id === data.id);
+          products.value[index] = updatedFacility;
+        }
       } else {
-        data.id = products.value.length + 1;
-        products.value.push({...data});
+        const createdFacility = await createProduct(data);
+
+        if (createdFacility) {
+          await getData();
+        }
       }
       dialog.value = false;
     };
 
-    const toggleActive = (item) => {
+    const toggleActive = async (item) => {
       const productToUpdate = products.value.find(f => f.id === item.id);
       if (productToUpdate) {
-        productToUpdate.active = !productToUpdate.active;
+        const statusCode = await toggleProductActive(productToUpdate.id);
+        if (statusCode === 200) {
+          productToUpdate.inactive = !productToUpdate.inactive;
+        }
       }
     };
+
+    onMounted(() => {
+      getData();
+    });
 
     return {
       search,

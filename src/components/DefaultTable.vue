@@ -125,13 +125,6 @@ function formatCurrency(value: number): string {
 </script>
 
 <style scoped>
-.page-container {
-  display: flex;
-  flex-direction: column;
-  background: rgba(255, 255, 255, 0.9);
-  height: 100%;
-}
-
 .text-right {
   text-align: right;
 }

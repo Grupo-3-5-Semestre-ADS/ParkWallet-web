@@ -81,7 +81,7 @@ export default {
         const res = await getFacilities();
         facilities.value.push(...res.data);
       } catch (error) {
-        console.error('Erro ao carregar dados:', error);
+        console.error(error);
       }
     };
 
