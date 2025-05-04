@@ -122,7 +122,7 @@ const props = defineProps<{
 const emit = defineEmits(["update:modelValue", "save", "cancel"]);
 
 const DEFAULT_COORDS: LatLngLiteral = {lat: -25.15880528152051, lng: -54.30024966327881};
-const googleMapsApiKey = 'AIzaSyBVdp0D_xhEKoipBD2in7afDkfL7kKyqic';
+const googleMapsApiKey = 'GOOGLE-MAPS-API-KEY';
 
 const localFacility = reactive<Facility>({
   name: '',
