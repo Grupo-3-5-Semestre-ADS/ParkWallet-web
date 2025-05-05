@@ -128,6 +128,7 @@ const toggleDrawer = () => {
   overflow: auto;
   padding: 20px;
   border-radius: 8px;
+  max-height: calc(100vh - 64px);
 }
 
 .logo-img {

@@ -1,4 +1,5 @@
 <template>
+  <!-- Search Row -->
   <v-row class="align-center mb-4 flex-grow-0">
     <v-col cols="6">
       <v-text-field
@@ -24,10 +25,7 @@
     </v-col>
   </v-row>
 
-  <v-row
-    class="flex-grow-1 overflow-auto"
-    style="position: relative;"
-  >
+  <v-row class="flex-grow-1">
     <v-data-table
       :items="filteredItems"
       :headers="headers"
@@ -36,6 +34,8 @@
       item-value="id"
       class="full-height transparent-background"
       hide-default-footer
+      fixed-header
+      height="500px"
       loading-text="Carregando dados iniciais..."
       no-data-text="Nenhum dado disponível"
       :items-per-page="-1"
@@ -106,24 +106,24 @@
         </v-chip>
       </template>
 
-      <template #bottom>
+      <template #tfoot>
         <div class="text-center pa-4">
           <v-progress-circular
             v-if="props.loading && filteredItems.length > 0"
             indeterminate
             color="primary"
             size="24"
+            class="mb-1"
           ></v-progress-circular>
+
+          <div
+            v-intersect.quiet="onIntersect"
+            style="height: 1px;"
+          ></div>
         </div>
       </template>
 
     </v-data-table>
-
-    <div
-      v-intersect.quiet="onIntersect"
-      style="height: 50px; width: 100%; position: absolute; bottom: 0;"
-    ></div>
-
   </v-row>
 </template>
 
@@ -191,5 +191,11 @@ function formatCurrency(value: number | string | undefined | null): string {
   align-items: center;
   justify-content: center;
   gap: 4px;
+  white-space: nowrap;
+}
+
+.v-data-table > .v-data-table__wrapper > table > tbody > tr:last-child > td > .v-data-table__bottom,
+.v-data-table .v-data-table__bottom {
+  min-height: 48px;
 }
 </style>
