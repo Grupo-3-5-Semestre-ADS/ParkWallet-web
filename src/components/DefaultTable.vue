@@ -8,6 +8,7 @@
         density="compact"
         clearable
         hide-details
+        placeholder="Filtrar resultados carregados..."
       />
     </v-col>
     <v-col
@@ -23,60 +24,71 @@
     </v-col>
   </v-row>
 
-  <v-row class="flex-grow-1 overflow-auto">
+  <v-row
+    class="flex-grow-1 overflow-auto"
+    style="position: relative;"
+  >
     <v-data-table
       :items="filteredItems"
       :headers="headers"
-      items-per-page="5"
+      :loading="props.loading && filteredItems.length === 0"
+      :search="search"
+      item-value="id"
       class="full-height transparent-background"
+      hide-default-footer
+      loading-text="Carregando dados iniciais..."
+      no-data-text="Nenhum dado disponível"
+      :items-per-page="-1"
     >
       <template #[`item.actions`]="{ item }">
-        <v-tooltip text="Editar">
-          <template #activator="{ props }">
-            <v-btn
-              v-bind="props"
-              icon
-              color="blue"
-              size="x-small"
-              class="mr-2"
-              @click="$emit('edit', item)"
-            >
-              <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-          </template>
-        </v-tooltip>
+        <div class="buttons-actions">
+          <v-tooltip text="Editar">
+            <template #activator="{ props: tooltipProps }">
+              <v-btn
+                v-bind="tooltipProps"
+                icon
+                color="blue"
+                size="x-small"
+                class="mr-2"
+                @click="$emit('edit', item)"
+              >
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
 
-        <v-tooltip :text="item.inactive ? 'Ativar' : 'Desativar'">
-          <template #activator="{ props }">
-            <v-btn
-              v-bind="props"
-              icon
-              :color="item.inactive ? 'green' : 'orange'"
-              size="x-small"
-              class="mr-2"
-              @click="$emit('toggle', item)"
-            >
-              <v-icon>{{ item.inactive ? 'mdi-check-circle' : 'mdi-cancel' }}</v-icon>
-            </v-btn>
-          </template>
-        </v-tooltip>
+          <v-tooltip :text="item.inactive ? 'Ativar' : 'Desativar'">
+            <template #activator="{ props: tooltipProps }">
+              <v-btn
+                v-bind="tooltipProps"
+                icon
+                :color="item.inactive ? 'green' : 'orange'"
+                size="x-small"
+                class="mr-2"
+                @click="$emit('toggle', item)"
+              >
+                <v-icon>{{ item.inactive ? 'mdi-check-circle' : 'mdi-cancel' }}</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
 
-        <v-tooltip
-          v-if="showMapButton"
-          text="Abrir no Mapa"
-        >
-          <template #activator="{ props }">
-            <v-btn
-              v-bind="props"
-              icon
-              color="green"
-              size="x-small"
-              @click="$emit('map', item)"
-            >
-              <v-icon>mdi-map-marker</v-icon>
-            </v-btn>
-          </template>
-        </v-tooltip>
+          <v-tooltip
+            v-if="showMapButton"
+            text="Abrir no Mapa"
+          >
+            <template #activator="{ props: tooltipProps }">
+              <v-btn
+                v-bind="tooltipProps"
+                icon
+                color="green"
+                size="x-small"
+                @click="$emit('map', item)"
+              >
+                <v-icon>mdi-map-marker</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
+        </div>
       </template>
 
       <template #[`item.value`]="{ item }">
@@ -93,7 +105,25 @@
           {{ item.inactive ? 'Inativo' : 'Ativo' }}
         </v-chip>
       </template>
+
+      <template #bottom>
+        <div class="text-center pa-4">
+          <v-progress-circular
+            v-if="props.loading && filteredItems.length > 0"
+            indeterminate
+            color="primary"
+            size="24"
+          ></v-progress-circular>
+        </div>
+      </template>
+
     </v-data-table>
+
+    <div
+      v-intersect.quiet="onIntersect"
+      style="height: 50px; width: 100%; position: absolute; bottom: 0;"
+    ></div>
+
   </v-row>
 </template>
 
@@ -106,18 +136,37 @@ const props = defineProps<{
   showMapButton?: boolean
   tableItems: any[]
   headers: any[]
+  loading: boolean
 }>();
-defineEmits(["add", "edit", "toggle", "map"]);
+
+const emit = defineEmits(["add", "edit", "toggle", "map", "load-more"]);
+
 const search = ref("");
 
-const filteredItems = computed(() =>
-  props.tableItems.filter(f =>
-    f.name.toLowerCase().includes(search.value.toLowerCase())
-  )
-);
+const filteredItems = computed(() => {
+  if (!search.value) {
+    return props.tableItems;
+  }
+  const searchTerm = search.value.toLowerCase();
+  return props.tableItems.filter(item =>
+    (item.name && item.name.toLowerCase().includes(searchTerm)) ||
+    (item.description && item.description.toLowerCase().includes(searchTerm)) ||
+    (item.type && item.type.toLowerCase().includes(searchTerm))
+  );
+});
 
-function formatCurrency(value: number): string {
-  return value.toLocaleString('pt-BR', {
+const onIntersect = (isIntersecting: boolean, entries: IntersectionObserverEntry[], observer: IntersectionObserver) => {
+  if (isIntersecting && !props.loading) {
+    emit('load-more');
+  }
+};
+
+function formatCurrency(value: number | string | undefined | null): string {
+  const numValue = Number(value);
+  if (isNaN(numValue)) {
+    return '';
+  }
+  return numValue.toLocaleString('pt-BR', {
     style: 'currency',
     currency: 'BRL'
   });
@@ -135,5 +184,12 @@ function formatCurrency(value: number): string {
 
 .transparent-background {
   background-color: transparent;
+}
+
+.buttons-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 </style>
