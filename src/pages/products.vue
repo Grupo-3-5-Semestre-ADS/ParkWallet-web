@@ -8,9 +8,11 @@
       add-button-text="Adicionar Produto"
       :table-items="products"
       :headers="headers"
+      :loading="isLoading"
       @add="openDialog"
       @edit="editProduct"
       @toggle="toggleActive"
+      @load-more="loadMoreProducts"
     />
 
     <CreateOrEditProducts
@@ -37,7 +39,6 @@ import CreateOrEditProducts from "@/components/dialogs/CreateOrEditProducts.vue"
 import DefaultTable from "@/components/DefaultTable.vue";
 import {
   createProduct,
-  getProduct,
   getProducts,
   toggleProductActive,
   updateProduct
@@ -47,89 +48,154 @@ export default {
   name: "ProductsPage",
   components: {DefaultTable, ConfirmDialog, CreateOrEditProducts},
   setup() {
-    const search = ref("");
     const dialog = ref(false);
     const confirmClose = ref(false);
     const editMode = ref(false);
-    const product = ref({id: null, name: "", description: "", value: 0, facilityId: null});
+    const product = ref({id: null, name: "", description: "", price: 0, facilityId: null, inactive: false});
 
-    const products = ref([]);
+    const products = ref<any[]>([]);
+    const isLoading = ref(false);
+    const currentPage = ref(1);
+    const itemsPerPage = ref(20);
+    const allItemsLoaded = ref(false);
 
     const headers = [
       {title: "Nome", key: "name"},
-      {title: "Estabelecimento", key: "facilityId"},
+      {title: "Estabelecimento ID", key: "facilityId"},
       {title: "Descrição", key: "description"},
       {title: "Valor", key: "price"},
       {title: "Ativo", key: "inactive"},
       {title: "Ações", key: "actions", sortable: false}
     ];
 
-    const getData = async () => {
+    const fetchProductsPage = async () => {
+      if (isLoading.value || allItemsLoaded.value) {
+        return;
+      }
+      isLoading.value = true;
+
       try {
-        const res = await getProducts();
-        products.value.push(...res.data);
+        const response = await getProducts(currentPage.value, itemsPerPage.value);
+
+        if (response && response.data && response._page) {
+          if (response.data.length > 0) {
+            products.value.push(...response.data);
+            currentPage.value++;
+          }
+
+          if (response._page.current >= response._page.total) {
+            allItemsLoaded.value = true;
+          }
+        } else {
+          console.error("Invalid data structure received from API for pagination:", response);
+          allItemsLoaded.value = true;
+        }
       } catch (error) {
-        console.error(error);
+        console.error("Failed to fetch products page:", error);
+      } finally {
+        isLoading.value = false;
       }
     };
 
+    const loadMoreProducts = () => {
+      fetchProductsPage();
+    };
+
+    const resetAndLoadData = async () => {
+      products.value = [];
+      currentPage.value = 1;
+      allItemsLoaded.value = false;
+      isLoading.value = false;
+      await fetchProductsPage();
+    };
+
     const openDialog = () => {
-      product.value = {id: null, name: "", description: "", value: 0};
+      product.value = {id: null, name: "", description: "", price: 0, facilityId: null, inactive: false};
       editMode.value = false;
       dialog.value = true;
     };
 
-    const editProduct = (item) => {
+    const editProduct = (item: any) => {
       product.value = {...item};
       editMode.value = true;
       dialog.value = true;
     };
 
-    const onSaveProduct = async (data) => {
-      if (editMode.value) {
-        const statusCode = await updateProduct(data.id, data);
-
-        if (statusCode === 200) {
-          const updatedFacility = await getProduct(data.id);
-          const index = products.value.findIndex(f => f.id === data.id);
-          products.value[index] = updatedFacility;
+    const onSaveProduct = async (data: any) => {
+      isLoading.value = true;
+      let success = false;
+      try {
+        if (editMode.value) {
+          const statusCode = await updateProduct(data.id, data);
+          if (statusCode === 200) {
+            success = true;
+          } else {
+            console.error("Update failed with status:", statusCode);
+          }
+        } else {
+          const createdProduct = await createProduct(data);
+          if (createdProduct) {
+            success = true;
+          } else {
+            console.error("Create failed");
+          }
         }
-      } else {
-        const createdFacility = await createProduct(data);
 
-        if (createdFacility) {
-          await getData();
+        if (success) {
+          await resetAndLoadData();
         }
+
+      } catch (error) {
+        console.error("Error saving product:", error);
+      } finally {
+        if (!success) {
+          isLoading.value = false;
+        }
+        dialog.value = false;
       }
-      dialog.value = false;
     };
 
-    const toggleActive = async (item) => {
-      const productToUpdate = products.value.find(f => f.id === item.id);
-      if (productToUpdate) {
-        const statusCode = await toggleProductActive(productToUpdate.id);
-        if (statusCode === 200) {
-          productToUpdate.inactive = !productToUpdate.inactive;
+    const toggleActive = async (item: any) => {
+      const originalStatus = item.inactive;
+      const index = products.value.findIndex(p => p.id === item.id);
+
+      if (index !== -1) {
+        products.value[index].inactive = !products.value[index].inactive;
+      }
+
+      try {
+        const statusCode = await toggleProductActive(item.id);
+        if (statusCode !== 200) {
+          if (index !== -1) {
+            products.value[index].inactive = originalStatus;
+          }
+          console.error("Toggle status failed with status:", statusCode);
         }
+      } catch (error) {
+        if (index !== -1) {
+          products.value[index].inactive = originalStatus;
+        }
+        console.error("Error toggling product status:", error);
       }
     };
 
     onMounted(() => {
-      getData();
+      resetAndLoadData();
     });
 
     return {
-      search,
       dialog,
       confirmClose,
       product,
       products,
       headers,
+      isLoading,
       openDialog,
       editProduct,
       onSaveProduct,
       toggleActive,
-      editMode
+      editMode,
+      loadMoreProducts,
     };
   }
 };
@@ -140,6 +206,7 @@ export default {
   display: flex;
   flex-direction: column;
   background: rgba(255, 255, 255, 0.9);
+  overflow-y: hidden;
   height: 100%;
 }
 </style>

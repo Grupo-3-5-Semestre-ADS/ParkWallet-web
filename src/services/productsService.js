@@ -10,8 +10,14 @@ const api = axios.create({
   },
 });
 
-export const getProducts = async () => {
-  const res = await api.get(collection);
+export const getProducts = async (page = 1, size = 10) => {
+  const res = await api.get(collection, {
+    params: {
+      _page: page,
+      _size: size,
+    }
+  });
+
   return res.data;
 };
 
