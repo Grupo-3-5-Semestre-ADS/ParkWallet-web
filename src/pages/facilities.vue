@@ -68,12 +68,12 @@ export default {
     // -----------------------------
 
     const headers = [
-      {title: "Nome", key: "name"},
-      {title: "Descrição", key: "description"},
-      {title: "Tipo", key: "type"},
-      {title: "Latitude", key: "latitude"},
-      {title: "Longitude", key: "longitude"},
-      {title: "Ativo", key: "inactive"},
+      {title: "Nome", key: "name", sortable: false},
+      {title: "Descrição", key: "description", sortable: false},
+      {title: "Tipo", key: "type", sortable: false},
+      {title: "Latitude", key: "latitude", sortable: false},
+      {title: "Longitude", key: "longitude", sortable: false},
+      {title: "Ativo", key: "inactive", sortable: false},
       {title: "Ações", key: "actions", sortable: false}
     ];
 

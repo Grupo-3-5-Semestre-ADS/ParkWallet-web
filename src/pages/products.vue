@@ -60,11 +60,11 @@ export default {
     const allItemsLoaded = ref(false);
 
     const headers = [
-      {title: "Nome", key: "name"},
-      {title: "Estabelecimento", key: "facility.name"},
-      {title: "Descrição", key: "description"},
-      {title: "Valor", key: "price"},
-      {title: "Ativo", key: "inactive"},
+      {title: "Nome", key: "name", sortable: false},
+      {title: "Estabelecimento", key: "facility.name", sortable: false},
+      {title: "Descrição", key: "description", sortable: false},
+      {title: "Valor", key: "price", sortable: false},
+      {title: "Ativo", key: "inactive", sortable: false},
       {title: "Ações", key: "actions", sortable: false}
     ];
 
