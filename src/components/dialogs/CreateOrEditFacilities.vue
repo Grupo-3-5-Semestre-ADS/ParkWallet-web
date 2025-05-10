@@ -142,7 +142,7 @@ const props = defineProps<{
 const emit = defineEmits(["update:modelValue", "save", "cancel"]);
 
 const DEFAULT_COORDS: LatLngLiteral = {lat: -25.15880528152051, lng: -54.30024966327881};
-const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_GOOGLE_MAPS_API_KEY_FALLBACK';
+const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const facilityTypes = [
   {text: 'Loja', value: 'store'},
