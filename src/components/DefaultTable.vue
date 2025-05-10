@@ -107,6 +107,8 @@
               </v-btn>
             </template>
           </v-tooltip>
+
+          <slot name="custom-actions" :item="item"></slot>
         </div>
       </template>
 
