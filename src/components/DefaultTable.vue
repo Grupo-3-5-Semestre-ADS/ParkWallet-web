@@ -95,6 +95,10 @@
         {{ formatCurrency(item.value) }}
       </template>
 
+      <template #[`item.type`]="{ item }">
+        {{ getTypeName(item.type) }}
+      </template>
+
       <template #[`item.inactive`]="{ item }">
         <v-chip
           :color="item.inactive ? 'red' : 'green'"
@@ -170,6 +174,19 @@ function formatCurrency(value: number | string | undefined | null): string {
     style: 'currency',
     currency: 'BRL'
   });
+}
+
+function getTypeName(type: number | string | undefined | null): string {
+  switch (type) {
+    case "store":
+      return "Loja";
+
+    case "attraction":
+      return "Atração";
+
+    case "other":
+      return "Outro";
+  }
 }
 </script>
 
