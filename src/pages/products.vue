@@ -61,7 +61,7 @@ export default {
 
     const headers = [
       {title: "Nome", key: "name"},
-      {title: "Estabelecimento ID", key: "facilityId"},
+      {title: "Estabelecimento", key: "facility.name"},
       {title: "Descrição", key: "description"},
       {title: "Valor", key: "price"},
       {title: "Ativo", key: "inactive"},
