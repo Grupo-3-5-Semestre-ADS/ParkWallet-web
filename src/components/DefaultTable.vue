@@ -17,6 +17,7 @@
       class="text-right"
     >
       <v-btn
+        v-if="props.showAddButton"
         color="primary"
         @click="$emit('add')"
       >
@@ -88,11 +89,29 @@
               </v-btn>
             </template>
           </v-tooltip>
+
+          <v-tooltip
+            v-if="showProductsButton"
+            text="Ver Produtos"
+          >
+            <template #activator="{ props: tooltipProps }">
+              <v-btn
+                v-bind="tooltipProps"
+                icon
+                color="purple"
+                size="x-small"
+                class="mr-2"
+                @click="$emit('view-products', item)"
+              >
+                <v-icon>mdi-storefront-outline</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
         </div>
       </template>
 
-      <template #[`item.value`]="{ item }">
-        {{ formatCurrency(item.value) }}
+      <template #[`item.price`]="{ item }">
+        {{ formatCurrency(item.price) }}
       </template>
 
       <template #[`item.type`]="{ item }">
@@ -138,12 +157,14 @@ const props = defineProps<{
   searchPlaceholder: string
   addButtonText: string
   showMapButton?: boolean
+  showAddButton?: boolean
+  showProductsButton?: boolean
   tableItems: any[]
   headers: any[]
   loading: boolean
 }>();
 
-const emit = defineEmits(["add", "edit", "toggle", "map", "load-more"]);
+const emit = defineEmits(["add", "edit", "toggle", "map", "load-more", "view-products"]);
 
 const search = ref("");
 

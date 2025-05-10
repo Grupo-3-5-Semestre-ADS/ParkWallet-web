@@ -26,6 +26,11 @@ export const getFacility = async (id) => {
   return res.data;
 };
 
+export const getFacilityProducts = async (id) => {
+  const res = await api.get(`${collection}/${id}/products`);
+  return res.data;
+};
+
 export const createFacility = async (data) => {
   console.log(data)
   const res = await api.post(collection, data);

@@ -10,11 +10,13 @@
       :headers="headers"
       :loading="isLoading"
       show-map-button
+      show-products-button
       @add="openDialog"
       @edit="editFacility"
       @toggle="toggleActive"
       @map="openMap"
       @load-more="loadMoreFacilities"
+      @view-products="openFacilityProductsDialog"
     />
 
     <CreateOrEditFacilities
@@ -37,6 +39,13 @@
       :latitude="selectedCoords.latitude"
       :longitude="selectedCoords.longitude"
     />
+
+    <FacilityProducts
+      v-if="selectedFacilityForProducts"
+      v-model="showFacilityProductsModal"
+      :facility-id="selectedFacilityForProducts.id"
+      :facility-name="selectedFacilityForProducts.name"
+    />
   </v-container>
 </template>
 
@@ -46,11 +55,12 @@ import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import CreateOrEditFacilities from "@/components/dialogs/CreateOrEditFacilities.vue";
 import MapDialog from "@/components/dialogs/MapDialog.vue";
 import DefaultTable from "@/components/DefaultTable.vue";
-import {createFacility, getFacilities, toggleFacilityActive, updateFacility} from '@/services/facilitiesService.js'; // Ensure path is correct
+import {createFacility, getFacilities, toggleFacilityActive, updateFacility} from '@/services/facilitiesService.js';
+import FacilityProducts from "@/components/dialogs/FacilityProducts.vue"; // Ensure path is correct
 
 export default {
   name: "FacilitiesPage",
-  components: {DefaultTable, MapDialog, ConfirmDialog, CreateOrEditFacilities},
+  components: {FacilityProducts, DefaultTable, MapDialog, ConfirmDialog, CreateOrEditFacilities},
   setup() {
     const dialog = ref(false);
     const confirmClose = ref(false);
@@ -59,13 +69,14 @@ export default {
     const selectedCoords = ref({latitude: 0, longitude: 0});
     const facility = ref({id: null, name: "", description: "", type: "", latitude: "", longitude: ""});
 
-    // --- Infinite Scroll State ---
     const facilities = ref<any[]>([]);
     const isLoading = ref(false);
     const currentPage = ref(1);
     const itemsPerPage = ref(20);
     const allItemsLoaded = ref(false);
-    // -----------------------------
+
+    const showFacilityProductsModal = ref(false);
+    const selectedFacilityForProducts = ref<Facility | null>(null);
 
     const headers = [
       {title: "Nome", key: "name", sortable: false},
@@ -192,6 +203,11 @@ export default {
       showMapDialog.value = true;
     };
 
+    const openFacilityProductsDialog = (item: Facility) => {
+      selectedFacilityForProducts.value = item;
+      showFacilityProductsModal.value = true;
+    };
+
     onMounted(() => {
       resetAndLoadData();
     });
@@ -210,6 +226,9 @@ export default {
       onSaveFacility,
       toggleActive,
       openMap,
+      showFacilityProductsModal,
+      selectedFacilityForProducts,
+      openFacilityProductsDialog,
       editMode,
       loadMoreFacilities,
     };

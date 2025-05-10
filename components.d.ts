@@ -12,6 +12,7 @@ declare module 'vue' {
     CreateOrEditProducts: typeof import('./src/components/dialogs/CreateOrEditProducts.vue')['default']
     CreateOrEditUsers: typeof import('./src/components/dialogs/CreateOrEditUsers.vue')['default']
     DefaultTable: typeof import('./src/components/DefaultTable.vue')['default']
+    FacilityProducts: typeof import('./src/components/dialogs/FacilityProducts.vue')['default']
     MapDialog: typeof import('./src/components/dialogs/MapDialog.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
