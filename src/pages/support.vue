@@ -318,8 +318,9 @@ watch(selectedClient, (newClient, oldClient) => {
 .page-container {
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.95);
-  height: calc(100vh - 96px);
+  background: rgba(255, 255, 255, 0.9);
+  overflow-y: hidden;
+  height: 100%;
 }
 
 .fill-height {
