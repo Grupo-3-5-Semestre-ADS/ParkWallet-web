@@ -43,7 +43,7 @@
     >
       <template #[`item.actions`]="{ item }">
         <div class="buttons-actions">
-          <v-tooltip text="Editar">
+          <v-tooltip v-if="props.showEditButton" text="Editar">
             <template #activator="{ props: tooltipProps }">
               <v-btn
                 v-bind="tooltipProps"
@@ -59,7 +59,7 @@
           </v-tooltip>
 
           <v-tooltip :text="item.inactive ? 'Ativar' : 'Desativar'">
-            <template #activator="{ props: tooltipProps }">
+            <template v-if="props.showInactivateButton" #activator="{ props: tooltipProps }">
               <v-btn
                 v-bind="tooltipProps"
                 icon
@@ -69,41 +69,6 @@
                 @click="$emit('toggle', item)"
               >
                 <v-icon>{{ item.inactive ? 'mdi-check-circle' : 'mdi-cancel' }}</v-icon>
-              </v-btn>
-            </template>
-          </v-tooltip>
-
-          <v-tooltip
-            v-if="showMapButton"
-            text="Abrir no Mapa"
-          >
-            <template #activator="{ props: tooltipProps }">
-              <v-btn
-                v-bind="tooltipProps"
-                icon
-                color="green"
-                size="x-small"
-                @click="$emit('map', item)"
-              >
-                <v-icon>mdi-map-marker</v-icon>
-              </v-btn>
-            </template>
-          </v-tooltip>
-
-          <v-tooltip
-            v-if="showProductsButton"
-            text="Ver Produtos"
-          >
-            <template #activator="{ props: tooltipProps }">
-              <v-btn
-                v-bind="tooltipProps"
-                icon
-                color="purple"
-                size="x-small"
-                class="mr-2"
-                @click="$emit('view-products', item)"
-              >
-                <v-icon>mdi-storefront-outline</v-icon>
               </v-btn>
             </template>
           </v-tooltip>
@@ -158,9 +123,9 @@ import {ref, computed} from "vue";
 const props = defineProps<{
   searchPlaceholder: string
   addButtonText: string
-  showMapButton?: boolean
   showAddButton?: boolean
-  showProductsButton?: boolean
+  showEditButton?: boolean
+  showInactivateButton?: boolean
   tableItems: any[]
   headers: any[]
   loading: boolean
@@ -182,7 +147,7 @@ const filteredItems = computed(() => {
   );
 });
 
-const onIntersect = (isIntersecting: boolean, entries: IntersectionObserverEntry[], observer: IntersectionObserver) => {
+const onIntersect = (isIntersecting: boolean) => {
   if (isIntersecting && !props.loading) {
     emit('load-more');
   }

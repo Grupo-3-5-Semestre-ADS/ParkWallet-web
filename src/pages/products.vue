@@ -10,6 +10,8 @@
       :headers="headers"
       :loading="isLoading"
       show-add-button
+      show-edit-button
+      show-inactivate-button
       @add="openDialog"
       @edit="editProduct"
       @toggle="toggleActive"

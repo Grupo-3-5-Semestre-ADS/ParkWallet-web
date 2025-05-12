@@ -25,7 +25,6 @@
               :loading="isLoading"
               :add-button-text="''"
               :show-add-button="false"
-              :show-map-button="false"
               @load-more="loadMoreFacilityProducts"
               :key="`facility-products-${facilityId}`"
             >

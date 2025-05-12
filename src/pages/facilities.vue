@@ -9,16 +9,52 @@
       :table-items="facilities"
       :headers="headers"
       :loading="isLoading"
-      show-map-button
-      show-products-button
       show-add-button
+      show-edit-button
+      show-inactivate-button
       @add="openDialog"
       @edit="editFacility"
       @toggle="toggleActive"
       @map="openMap"
       @load-more="loadMoreFacilities"
       @view-products="openFacilityProductsDialog"
-    />
+    >
+      <template #custom-actions="{ item }">
+        <v-tooltip
+          text="Abrir no Mapa"
+        >
+          <template #activator="{ props: tooltipProps }">
+            <v-btn
+              v-bind="tooltipProps"
+              icon
+              color="green"
+              size="x-small"
+              class="mr-2"
+              @click="openMap(item)"
+            >
+              <v-icon>mdi-map-marker</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+
+        <v-tooltip
+          text="Ver Produtos"
+        >
+          <template #activator="{ props: tooltipProps }">
+            <v-btn
+              v-bind="tooltipProps"
+              icon
+              color="purple"
+              size="x-small"
+              class="mr-2"
+              @click="openFacilityProductsDialog(item)"
+            >
+              <v-icon>mdi-storefront-outline</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+      </template>
+    </DefaultTable>
 
     <CreateOrEditFacilities
       v-model="dialog"
