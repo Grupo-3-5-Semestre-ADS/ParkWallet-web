@@ -52,16 +52,20 @@
         <GoogleMap
           :api-key="googleMapsApiKey"
           :center="mapCenter"
-          :zoom="15"
+          :max-zoom="20"
+          :min-zoom="16"
+          :street-view-control="false"
+          :map-type-control="false"
+          :restriction="mapRestrictions"
+          map-type-id="satellite"
+          :zoom="18"
           style="width: 100%; height: 350px"
           ref="mapRef"
-          :options="mapOptionsWithRestrictions"
         >
           <Marker
             :options="markerOptions"
             @dragend="handleMarkerDragEnd"
           />
-          <Rectangle :options="allowedAreaRectangleOptions"/>
         </GoogleMap>
         <v-row class="mt-1">
           <v-col cols="6">
@@ -119,7 +123,7 @@
 
 <script lang="ts" setup>
 import {watch, ref, computed} from "vue";
-import {GoogleMap, Marker, Rectangle} from "vue3-google-map";
+import {GoogleMap, Marker} from "vue3-google-map";
 import * as yup from "yup";
 import {useForm, useField} from 'vee-validate';
 import {toTypedSchema} from '@vee-validate/yup';
@@ -248,29 +252,10 @@ const mapRef = ref<InstanceType<typeof GoogleMap> | null>(null);
 const mapCenter = ref<LatLngLiteral>({...DEFAULT_COORDS});
 const markerPosition = ref<LatLngLiteral>({...DEFAULT_COORDS});
 
-const mapOptionsWithRestrictions = computed(() => ({
-  restriction: {
-    latLngBounds: MAP_BOUNDS,
-    strictBounds: true,
-  },
-  minZoom: 14,
-  maxZoom: 18,
-  mapTypeControl: false,
-  streetViewControl: false,
-}));
-
-const allowedAreaRectangleOptions = computed(() => ({
-  bounds: MAP_BOUNDS,
-  strokeColor: "#FF0000",
-  strokeOpacity: 0.8,
-  strokeWeight: 2,
-  fillColor: "#FFFFFF",
-  fillOpacity: 0,
-  clickable: false,
-  draggable: false,
-  editable: false,
-}));
-
+const mapRestrictions = {
+  latLngBounds: MAP_BOUNDS,
+  strictBounds: true,
+};
 
 const markerOptions = computed(() => ({
   position: markerPosition.value,
