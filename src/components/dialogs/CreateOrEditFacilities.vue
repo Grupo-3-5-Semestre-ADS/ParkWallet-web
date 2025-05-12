@@ -155,6 +155,10 @@ const DEFAULT_COORDS: LatLngLiteral = {
   lng: (MAP_BOUNDS.east + MAP_BOUNDS.west) / 2,
 };
 
+const mapRestrictions = {
+  latLngBounds: MAP_BOUNDS,
+  strictBounds: true,
+};
 
 const props = defineProps<{
   modelValue: boolean;
@@ -251,11 +255,6 @@ const submitError = ref<string | null>(null);
 const mapRef = ref<InstanceType<typeof GoogleMap> | null>(null);
 const mapCenter = ref<LatLngLiteral>({...DEFAULT_COORDS});
 const markerPosition = ref<LatLngLiteral>({...DEFAULT_COORDS});
-
-const mapRestrictions = {
-  latLngBounds: MAP_BOUNDS,
-  strictBounds: true,
-};
 
 const markerOptions = computed(() => ({
   position: markerPosition.value,
