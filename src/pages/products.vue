@@ -9,6 +9,7 @@
       :table-items="products"
       :headers="headers"
       :loading="isLoading"
+      show-add-button
       @add="openDialog"
       @edit="editProduct"
       @toggle="toggleActive"

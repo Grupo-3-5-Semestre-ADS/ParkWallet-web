@@ -11,6 +11,7 @@
       :loading="isLoading"
       show-map-button
       show-products-button
+      show-add-button
       @add="openDialog"
       @edit="editFacility"
       @toggle="toggleActive"
@@ -56,7 +57,7 @@ import CreateOrEditFacilities from "@/components/dialogs/CreateOrEditFacilities.
 import MapDialog from "@/components/dialogs/MapDialog.vue";
 import DefaultTable from "@/components/DefaultTable.vue";
 import {createFacility, getFacilities, toggleFacilityActive, updateFacility} from '@/services/facilitiesService.js';
-import FacilityProducts from "@/components/dialogs/FacilityProducts.vue"; // Ensure path is correct
+import FacilityProducts from "@/components/dialogs/FacilityProducts.vue";
 
 export default {
   name: "FacilitiesPage",
@@ -66,7 +67,7 @@ export default {
     const confirmClose = ref(false);
     const editMode = ref(false);
     const showMapDialog = ref(false);
-    const selectedCoords = ref({latitude: 0, longitude: 0});
+    const selectedCoords = ref({latitude: "0", longitude: "0"});
     const facility = ref({id: null, name: "", description: "", type: "", latitude: "", longitude: ""});
 
     const facilities = ref<any[]>([]);
@@ -171,7 +172,7 @@ export default {
         console.error("Error saving facility:", error);
       } finally {
         if (!success) isLoading.value = false;
-        dialog.value = false; // Close dialog
+        dialog.value = false;
       }
     };
 
