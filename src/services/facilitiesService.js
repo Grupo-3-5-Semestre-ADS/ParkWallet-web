@@ -32,9 +32,8 @@ export const getFacilityProducts = async (id) => {
 };
 
 export const createFacility = async (data) => {
-  console.log(data)
   const res = await api.post(collection, data);
-  return res.data;
+  return res.status;
 };
 
 export const updateFacility = async (id, data) => {

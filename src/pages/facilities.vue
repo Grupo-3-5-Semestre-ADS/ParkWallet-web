@@ -193,8 +193,9 @@ export default {
             console.error("Update failed with status:", statusCode);
           }
         } else {
-          const createdFacility = await createFacility(data);
-          if (createdFacility) {
+          const statusCode = await createFacility(data);
+
+          if (statusCode === 201) {
             success = true;
           } else {
             console.error("Create failed");
