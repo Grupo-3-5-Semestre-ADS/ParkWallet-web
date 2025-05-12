@@ -41,11 +41,11 @@ export default defineComponent({
   props: {
     modelValue: Boolean,
     latitude: {
-      type: Number,
+      type: String,
       default: 0
     },
     longitude: {
-      type: Number,
+      type: String,
       default: 0
     },
   },
