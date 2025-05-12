@@ -147,6 +147,7 @@ export default {
     const onSaveFacility = async (data: any) => {
       isLoading.value = true;
       let success = false;
+
       try {
         if (editMode.value) {
           const statusCode = await updateFacility(data.id, data);
@@ -165,6 +166,7 @@ export default {
         }
 
         if (success) {
+          isLoading.value = false;
           await resetAndLoadData();
         }
 
