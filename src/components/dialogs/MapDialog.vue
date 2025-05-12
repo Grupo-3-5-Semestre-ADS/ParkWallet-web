@@ -4,14 +4,13 @@
     max-width="1000px"
   >
     <v-card>
-      <v-card-title class="d-flex justify-space-between align-center">
-        <span>Localização no Google Maps</span>
-        <v-btn
-          icon="mdi-close"
-          variant="text"
-          @click="showDialog = false"
-        />
-      </v-card-title>
+      <v-toolbar color="primary" dark density="compact">
+        <v-toolbar-title>Localização no Google Maps</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon dark @click="$emit('update:modelValue', false)">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-toolbar>
 
       <v-card-text>
         <v-skeleton-loader

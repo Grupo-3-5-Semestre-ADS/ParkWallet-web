@@ -5,9 +5,13 @@
     max-width="400px"
   >
     <v-card>
-      <v-card-title class="text-h6">
-        {{ title }}
-      </v-card-title>
+      <v-toolbar color="primary" dark density="compact">
+        <v-toolbar-title>{{ title }}</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon dark @click="$emit('update:modelValue', false)">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-toolbar>
       <v-card-text>{{ message }}</v-card-text>
       <v-card-actions>
         <v-btn

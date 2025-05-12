@@ -6,9 +6,15 @@
     @update:model-value="handleDialogClose"
   >
     <v-card>
-      <v-card-title>
-        {{ editMode ? "Editar Produto" : "Adicionar Produto" }}
-      </v-card-title>
+      <v-toolbar color="primary" dark density="compact">
+        <v-toolbar-title>
+          {{ editMode ? "Editar Produto" : "Adicionar Produto" }}
+        </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon dark @click="handleCancel">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-toolbar>
 
       <v-card-text>
         <v-text-field
