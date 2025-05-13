@@ -43,7 +43,10 @@
     >
       <template #[`item.actions`]="{ item }">
         <div class="buttons-actions">
-          <v-tooltip v-if="props.showEditButton" text="Editar">
+          <v-tooltip
+            v-if="props.showEditButton"
+            text="Editar"
+          >
             <template #activator="{ props: tooltipProps }">
               <v-btn
                 v-bind="tooltipProps"
@@ -58,22 +61,28 @@
             </template>
           </v-tooltip>
 
-          <v-tooltip :text="item.inactive ? 'Ativar' : 'Desativar'">
-            <template v-if="props.showInactivateButton" #activator="{ props: tooltipProps }">
+          <v-tooltip :text="item.active ? 'Desativar' : 'Ativar'">
+            <template
+              v-if="props.showInactivateButton"
+              #activator="{ props: tooltipProps }"
+            >
               <v-btn
                 v-bind="tooltipProps"
                 icon
-                :color="item.inactive ? 'green' : 'orange'"
+                :color="item.active ? 'orange' : 'green'"
                 size="x-small"
                 class="mr-2"
                 @click="$emit('toggle', item)"
               >
-                <v-icon>{{ item.inactive ? 'mdi-check-circle' : 'mdi-cancel' }}</v-icon>
+                <v-icon>{{ item.active ? 'mdi-cancel' : 'mdi-check-circle' }}</v-icon>
               </v-btn>
             </template>
           </v-tooltip>
 
-          <slot name="custom-actions" :item="item"></slot>
+          <slot
+            name="custom-actions"
+            :item="item"
+          />
         </div>
       </template>
 
@@ -85,14 +94,14 @@
         {{ getTypeName(item.type) }}
       </template>
 
-      <template #[`item.inactive`]="{ item }">
+      <template #[`item.active`]="{ item }">
         <v-chip
-          :color="item.inactive ? 'red' : 'green'"
+          :color="item.active ? 'green' : 'red'"
           text-color="white"
           small
           label
         >
-          {{ item.inactive ? 'Inativo' : 'Ativo' }}
+          {{ item.active ? 'Ativo' : 'Inativo' }}
         </v-chip>
       </template>
 
@@ -104,15 +113,14 @@
             color="primary"
             size="24"
             class="mb-1"
-          ></v-progress-circular>
+          />
 
           <div
             v-intersect.quiet="onIntersect"
             style="height: 1px;"
-          ></div>
+          />
         </div>
       </template>
-
     </v-data-table>
   </v-row>
 </template>

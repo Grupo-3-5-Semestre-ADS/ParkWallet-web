@@ -42,7 +42,7 @@ import DefaultTable from "@/components/DefaultTable.vue";
 import {
   getUsers,
   updateUser,
-  deleteUser,
+  toggleUserActive,
   addUserRoles,
   removeUserRoles
 } from "@/services/usersService.js";
@@ -53,7 +53,7 @@ interface UserForPage {
   email: string;
   cpf?: string;
   birthdate?: string;
-  inactive: boolean;
+  active: boolean;
   password?: string;
   roles?: any[];
 }
@@ -67,7 +67,7 @@ export default {
     const editMode = ref(false);
 
     const initialUser: UserForPage = {
-        id: null, name: "", email: "", cpf: "", birthdate: "", inactive: false, roles: []
+        id: null, name: "", email: "", cpf: "", birthdate: "", active: true, roles: []
     };
     const currentUser = ref<UserForPage | null>({...initialUser});
 
@@ -83,7 +83,7 @@ export default {
       { title: "CPF", key: "cpf", sortable: false },
       { title: "Data de Nascimento", key: "birthdate", sortable: false },
       // { title: "Permissões", key: "roles", sortable: false },
-      { title: "Ativo", key: "inactive", sortable: false },
+      { title: "Ativo", key: "active", sortable: false },
       { title: "Ações", key: "actions", sortable: false }
     ];
 
@@ -188,24 +188,25 @@ export default {
     const toggleActive = async (item: UserForPage) => {
       if (item.id === null) return;
 
-      const originalStatus = item.inactive;
+      const originalStatus = item.active;
       const index = users.value.findIndex(u => u.id === item.id);
 
       if (index !== -1) {
-        users.value[index].inactive = !users.value[index].inactive;
+        users.value[index].active = !users.value[index].active;
       }
 
       try {
-        const statusCode = await deleteUser(item.id);
+        const statusCode = await toggleUserActive(item.id);
+        console.log(statusCode)
         if (statusCode !== 200) {
           if (index !== -1) {
-            users.value[index].inactive = originalStatus;
+            users.value[index].active = originalStatus;
           }
           console.error("Toggle user status failed with status:", statusCode);
         }
       } catch (error) {
         if (index !== -1) {
-          users.value[index].inactive = originalStatus;
+          users.value[index].active = originalStatus;
         }
         console.error("Error toggling user status:", error);
       }

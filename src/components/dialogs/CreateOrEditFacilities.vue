@@ -6,12 +6,20 @@
     @update:model-value="handleDialogClose"
   >
     <v-card>
-      <v-toolbar color="primary" dark density="compact">
+      <v-toolbar
+        color="primary"
+        dark
+        density="compact"
+      >
         <v-toolbar-title>
           {{ editMode ? "Editar Estabelecimento" : "Adicionar Estabelecimento" }}
         </v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-btn icon dark @click="handleCancel">
+        <v-spacer />
+        <v-btn
+          icon
+          dark
+          @click="handleCancel"
+        >
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-toolbar>
@@ -44,12 +52,15 @@
           :error-messages="errors.type"
           required
           class="mb-3"
-          @update:modelValue="setFieldValue('type', $event)"
+          @update:model-value="setFieldValue('type', $event)"
           @blur="handleBlur('type')"
         />
 
-        <p class="text-caption mb-1">Arraste o marcador dentro da área delimitada para definir a localização *:</p>
+        <p class="text-caption mb-1">
+          Arraste o marcador dentro da área delimitada para definir a localização *:
+        </p>
         <GoogleMap
+          ref="mapRef"
           :api-key="googleMapsApiKey"
           :center="mapCenter"
           :max-zoom="20"
@@ -60,7 +71,6 @@
           map-type-id="satellite"
           :zoom="18"
           style="width: 100%; height: 350px"
-          ref="mapRef"
         >
           <Marker
             :options="markerOptions"
@@ -93,10 +103,14 @@
             />
           </v-col>
         </v-row>
-        <v-alert v-if="submitError" type="error" density="compact" class="mt-4">
+        <v-alert
+          v-if="submitError"
+          type="error"
+          density="compact"
+          class="mt-4"
+        >
           {{ submitError }}
         </v-alert>
-
       </v-card-text>
       <v-card-actions>
         <v-btn
@@ -106,13 +120,13 @@
         >
           Cancelar
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           color="primary"
           variant="flat"
-          @click="onSubmit"
           :disabled="!meta.valid || isSubmitting"
           :loading="isSubmitting"
+          @click="onSubmit"
         >
           Salvar
         </v-btn>
@@ -135,7 +149,7 @@ interface Facility {
   type: 'store' | 'attraction' | 'other' | null;
   latitude: number | null;
   longitude: number | null;
-  inactive?: boolean;
+  active?: boolean;
 }
 
 interface LatLngLiteral {
@@ -208,7 +222,10 @@ const validationSchema = toTypedSchema(
       .max(MAP_BOUNDS.east, `Longitude fora da área permitida (máx: ${MAP_BOUNDS.east.toFixed(4)})`)
       .required("Longitude é obrigatória")
       .nullable(),
-    inactive: yup.boolean().optional().default(false),
+    active: yup
+      .boolean()
+      .optional()
+      .default(true),
   })
 );
 
@@ -265,7 +282,7 @@ const markerOptions = computed(() => ({
 const clamp = (num: number, min: number, max: number) => Math.min(Math.max(num, min), max);
 
 const updateMapVisuals = (coords: LatLngLiteral | null) => {
-  let position = coords ?? {...DEFAULT_COORDS};
+  const position = coords ?? {...DEFAULT_COORDS};
 
   position.lat = clamp(position.lat, MAP_BOUNDS.south, MAP_BOUNDS.north);
   position.lng = clamp(position.lng, MAP_BOUNDS.west, MAP_BOUNDS.east);
@@ -297,7 +314,7 @@ const setFormDataAndMap = (facilityData: Facility | null) => {
     type: props.editMode ? facilityData?.type ?? null : null,
     latitude: initialLat,
     longitude: initialLng,
-    inactive: props.editMode ? facilityData?.inactive ?? false : false,
+    active: props.editMode ? facilityData?.active ?? true : true,
   };
 
   resetForm({values: initialValues});

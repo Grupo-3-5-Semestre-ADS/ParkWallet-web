@@ -121,7 +121,7 @@ export default {
       {title: "Tipo", key: "type", sortable: false},
       {title: "Latitude", key: "latitude", sortable: false},
       {title: "Longitude", key: "longitude", sortable: false},
-      {title: "Ativo", key: "inactive", sortable: false},
+      {title: "Ativo", key: "active", sortable: false},
       {title: "Ações", key: "actions", sortable: false}
     ];
 
@@ -216,23 +216,23 @@ export default {
     };
 
     const toggleActive = async (item: any) => {
-      const originalStatus = item.inactive;
+      const originalStatus = item.active;
       const index = facilities.value.findIndex(f => f.id === item.id);
       if (index !== -1) {
-        facilities.value[index].inactive = !facilities.value[index].inactive;
+        facilities.value[index].active = !facilities.value[index].active;
       }
 
       try {
         const statusCode = await toggleFacilityActive(item.id);
         if (statusCode !== 200) {
           if (index !== -1) {
-            facilities.value[index].inactive = originalStatus;
+            facilities.value[index].active = originalStatus;
           }
           console.error("Toggle status failed with status:", statusCode);
         }
       } catch (error) {
         if (index !== -1) {
-          facilities.value[index].inactive = originalStatus;
+          facilities.value[index].active = originalStatus;
         }
         console.error("Error toggling facility status:", error);
       }

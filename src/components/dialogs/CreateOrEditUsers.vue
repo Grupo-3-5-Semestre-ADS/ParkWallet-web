@@ -6,12 +6,20 @@
     @update:model-value="handleDialogClose"
   >
     <v-card>
-      <v-toolbar color="primary" dark density="compact">
+      <v-toolbar
+        color="primary"
+        dark
+        density="compact"
+      >
         <v-toolbar-title>
           {{ editMode ? "Editar Usuário" : "Adicionar Usuário" }}
         </v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-btn icon dark @click="handleCancel">
+        <v-spacer />
+        <v-btn
+          icon
+          dark
+          @click="handleCancel"
+        >
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-toolbar>
@@ -66,10 +74,14 @@
           @blur="handleBlur('roles')"
         />
 
-        <v-alert v-if="submitError" type="error" density="compact" class="mt-4">
+        <v-alert
+          v-if="submitError"
+          type="error"
+          density="compact"
+          class="mt-4"
+        >
           {{ submitError }}
         </v-alert>
-
       </v-card-text>
 
       <v-card-actions>
@@ -80,13 +92,13 @@
         >
           Cancelar
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           color="primary"
           variant="flat"
-          @click="onSubmit"
           :disabled="!meta.valid || isSubmitting || rolesLoading"
           :loading="isSubmitting"
+          @click="onSubmit"
         >
           Salvar
         </v-btn>
@@ -108,7 +120,7 @@ interface User {
   email: string;
   cpf?: string;
   birthdate: string;
-  inactive?: boolean;
+  active?: boolean;
   roles?: string[];
 }
 
@@ -153,10 +165,10 @@ const createUserSchema = yup.object().shape({
     .array()
     .of(yup.string())
     .optional(),
-  inactive: yup
+  active: yup
     .boolean()
     .optional()
-    .default(false),
+    .default(true),
 });
 
 const currentValidationSchema = computed(() => {
@@ -232,7 +244,7 @@ const setFormData = (userData: User | null) => {
     email: userData?.email ?? '',
     cpf: userData?.cpf ?? '',
     birthdate: userData?.birthdate ?? '',
-    inactive: userData?.inactive ?? false,
+    active: userData?.active ?? true,
     roles: roleNames,
   };
   resetForm({values: initialValues});

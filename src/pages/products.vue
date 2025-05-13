@@ -54,7 +54,7 @@ export default {
     const dialog = ref(false);
     const confirmClose = ref(false);
     const editMode = ref(false);
-    const product = ref({id: null, name: "", description: "", price: 0, facilityId: null, inactive: false});
+    const product = ref({id: null, name: "", description: "", price: 0, facilityId: null, active: true});
 
     const products = ref<any[]>([]);
     const isLoading = ref(false);
@@ -67,7 +67,7 @@ export default {
       {title: "Estabelecimento", key: "facility.name", sortable: false},
       {title: "Descrição", key: "description", sortable: false},
       {title: "Valor", key: "price", sortable: false},
-      {title: "Ativo", key: "inactive", sortable: false},
+      {title: "Ativo", key: "active", sortable: false},
       {title: "Ações", key: "actions", sortable: false}
     ];
 
@@ -79,6 +79,8 @@ export default {
 
       try {
         const response = await getProducts(currentPage.value, itemsPerPage.value);
+
+        console.log(response)
 
         if (response && response.data && response._page) {
           if (response.data.length > 0) {
@@ -113,7 +115,7 @@ export default {
     };
 
     const openDialog = () => {
-      product.value = {id: null, name: "", description: "", price: 0, facilityId: null, inactive: false};
+      product.value = {id: null, name: "", description: "", price: 0, facilityId: null, active: true};
       editMode.value = false;
       dialog.value = true;
     };
@@ -159,24 +161,24 @@ export default {
     };
 
     const toggleActive = async (item: any) => {
-      const originalStatus = item.inactive;
+      const originalStatus = item.active;
       const index = products.value.findIndex(p => p.id === item.id);
 
       if (index !== -1) {
-        products.value[index].inactive = !products.value[index].inactive;
+        products.value[index].active = !products.value[index].active;
       }
 
       try {
         const statusCode = await toggleProductActive(item.id);
         if (statusCode !== 200) {
           if (index !== -1) {
-            products.value[index].inactive = originalStatus;
+            products.value[index].active = originalStatus;
           }
           console.error("Toggle status failed with status:", statusCode);
         }
       } catch (error) {
         if (index !== -1) {
-          products.value[index].inactive = originalStatus;
+          products.value[index].active = originalStatus;
         }
         console.error("Error toggling product status:", error);
       }

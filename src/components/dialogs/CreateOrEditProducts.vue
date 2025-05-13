@@ -6,12 +6,20 @@
     @update:model-value="handleDialogClose"
   >
     <v-card>
-      <v-toolbar color="primary" dark density="compact">
+      <v-toolbar
+        color="primary"
+        dark
+        density="compact"
+      >
         <v-toolbar-title>
           {{ editMode ? "Editar Produto" : "Adicionar Produto" }}
         </v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-btn icon dark @click="handleCancel">
+        <v-spacer />
+        <v-btn
+          icon
+          dark
+          @click="handleCancel"
+        >
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-toolbar>
@@ -59,14 +67,18 @@
           :loading="facilitiesLoading"
           required
           class="mb-3"
-          @update:modelValue="setFieldValue('facilityId', $event, true)"
+          @update:model-value="setFieldValue('facilityId', $event, true)"
           @blur="handleBlur('facilityId')"
         />
 
-        <v-alert v-if="submitError" type="error" density="compact" class="mt-4">
+        <v-alert
+          v-if="submitError"
+          type="error"
+          density="compact"
+          class="mt-4"
+        >
           {{ submitError }}
         </v-alert>
-
       </v-card-text>
 
       <v-card-actions>
@@ -77,13 +89,13 @@
         >
           Cancelar
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           color="primary"
           variant="flat"
-          @click="onSubmit"
           :disabled="!meta.valid || isSubmitting || facilitiesLoading"
           :loading="isSubmitting"
+          @click="onSubmit"
         >
           Salvar
         </v-btn>
@@ -105,7 +117,7 @@ interface Product {
   description: string;
   price: number | null;
   facilityId: number | null;
-  inactive?: boolean;
+  active?: boolean;
 }
 
 interface FacilityInfo {
@@ -154,7 +166,10 @@ const validationSchema = toTypedSchema(
       .min(1, "Estabelecimento inválido")
       .required("Estabelecimento é obrigatório")
       .nullable(),
-    inactive: yup.boolean().optional().default(false),
+    active: yup
+      .boolean()
+      .optional()
+      .default(true),
   })
 );
 
@@ -222,7 +237,7 @@ const setFormData = (productData: Product | null) => {
     description: props.editMode ? productData?.description ?? '' : '',
     price: props.editMode ? productData?.price ?? null : null,
     facilityId: props.editMode ? productData?.facilityId ?? null : null,
-    inactive: props.editMode ? productData?.inactive ?? false : false,
+    active: props.editMode ? productData?.active ?? true : true,
   };
   resetForm({values: initialValues});
 };

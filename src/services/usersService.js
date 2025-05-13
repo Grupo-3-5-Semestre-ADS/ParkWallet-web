@@ -31,8 +31,8 @@ export const updateUser = async (id, data) => {
   return res.status;
 };
 
-export const deleteUser = async (id) => {
-  const res = await api.patch(`${collection}/${id}`);
+export const toggleUserActive = async (id) => {
+  const res = await api.patch(`${collection}/${id}/toggle-status`);
   return res.status;
 };
 
