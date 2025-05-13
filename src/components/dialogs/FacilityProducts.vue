@@ -294,7 +294,9 @@ const generateAndShowQrCode = () => {
     return;
   }
 
-  qrCodeData.value = JSON.stringify(dataForQr);
+  qrCodeData.value = JSON.stringify({
+    products: dataForQr
+  });
   showQrDialog.value = true;
   isGeneratingQr.value = false;
 };
