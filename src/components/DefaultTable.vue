@@ -94,6 +94,20 @@
         {{ getTypeName(item.type) }}
       </template>
 
+      <template #[`item.roles`]="{ item }">
+        <v-chip
+          v-for="role in item.roles"
+          :key="role.UserRoles.id"
+          color="blue"
+          text-color="white"
+          small
+          label
+          class="mr-2"
+        >
+          {{ role.name }}
+        </v-chip>
+      </template>
+
       <template #[`item.active`]="{ item }">
         <v-chip
           :color="item.active ? 'green' : 'red'"

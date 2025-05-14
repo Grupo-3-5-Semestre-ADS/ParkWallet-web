@@ -82,7 +82,7 @@ export default {
       { title: "E-mail", key: "email", sortable: false },
       { title: "CPF", key: "cpf", sortable: false },
       { title: "Data de Nascimento", key: "birthdate", sortable: false },
-      // { title: "Permissões", key: "roles", sortable: false },
+      { title: "Permissões", key: "roles", sortable: false },
       { title: "Ativo", key: "active", sortable: false },
       { title: "Ações", key: "actions", sortable: false }
     ];
