@@ -27,12 +27,22 @@
             Login
           </v-card-title>
           <v-card-text>
+            <v-alert
+              v-if="errorMessage"
+              type="error"
+              dense
+              class="mb-4"
+            >
+              {{ errorMessage }}
+            </v-alert>
             <v-form @submit.prevent="handleSubmit">
               <v-text-field
                 v-model="email"
                 label="E-mail"
                 type="email"
                 required
+                :error-messages="emailErrors"
+                @blur="validateEmail"
               />
 
               <v-text-field
@@ -40,6 +50,8 @@
                 label="Senha"
                 type="password"
                 required
+                :error-messages="passwordErrors"
+                @blur="validatePassword"
               />
 
               <v-btn
@@ -47,8 +59,8 @@
                 color="primary"
                 block
                 class="mt-4"
-                :disabled="!email || !password"
-                to="/facilities"
+                :disabled="!isFormValid || loading"
+                :loading="loading"
               >
                 Entrar
               </v-btn>
@@ -61,24 +73,88 @@
 </template>
 
 <script lang="ts">
-import {ref} from 'vue'
+import {ref, computed} from 'vue'
+import {useRouter} from 'vue-router'
+import {login} from '@/services/authService.js'
 
 export default {
   name: 'LoginPage',
 
   setup() {
+    const router = useRouter()
+
     const email = ref('')
     const password = ref('')
+    const loading = ref(false)
+    const errorMessage = ref('')
 
-    const handleSubmit = () => {
-      console.log('Email:', email.value)
-      console.log('Senha:', password.value)
+    const emailErrors = ref<string[]>([])
+    const passwordErrors = ref<string[]>([])
+
+    const validateEmail = () => {
+      emailErrors.value = []
+      if (!email.value) {
+        emailErrors.value.push('E-mail é obrigatório.')
+      } else if (!/.+@.+\..+/.test(email.value)) {
+        emailErrors.value.push('E-mail deve ser válido.')
+      }
+    }
+
+    const validatePassword = () => {
+      passwordErrors.value = []
+      if (!password.value) {
+        passwordErrors.value.push('Senha é obrigatória.')
+      }
+    }
+
+    const isFormValid = computed(() => {
+      return !!email.value && !!password.value && emailErrors.value.length === 0 && passwordErrors.value.length === 0
+    })
+
+    const handleSubmit = async () => {
+      validateEmail()
+      validatePassword()
+
+      if (!isFormValid.value) {
+        return
+      }
+
+      loading.value = true
+      errorMessage.value = ''
+
+      try {
+        const credentials = {
+          email: email.value,
+          password: password.value
+        }
+        const response = await login(credentials)
+
+        if (response.data && response.data.token) {
+          localStorage.setItem('authToken', response.data.token)
+          await router.push('/facilities')
+        } else {
+          errorMessage.value = 'Resposta de login inesperada. Tente novamente.'
+        }
+
+      } catch (error: any) {
+        console.error('Login failed:', error)
+        errorMessage.value = 'Falha no login. Verifique suas credenciais ou tente novamente mais tarde.'
+      } finally {
+        loading.value = false
+      }
     }
 
     return {
       email,
       password,
-      handleSubmit
+      loading,
+      errorMessage,
+      handleSubmit,
+      emailErrors,
+      passwordErrors,
+      validateEmail,
+      validatePassword,
+      isFormValid,
     }
   }
 }
