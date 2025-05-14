@@ -7,8 +7,8 @@
 <script lang="ts" setup>
 import {useRoute} from 'vue-router'
 import {computed} from 'vue'
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import BlankLayout from "@/layouts/BlankLayout.vue"
 
 const route = useRoute()
-const Layout = computed(() => route.meta.layout || DefaultLayout)
+const Layout = computed(() => route.meta.layout || BlankLayout)
 </script>
