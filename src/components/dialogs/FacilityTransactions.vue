@@ -12,7 +12,7 @@
         density="compact"
       >
         <v-toolbar-title>Transações de: {{ facilityName }}</v-toolbar-title>
-        <v-spacer />
+        <v-spacer/>
         <v-btn
           icon
           dark
@@ -30,11 +30,52 @@
           :table-items="transactions"
           :headers="transactionTableHeaders"
           :loading="isLoading"
-          :show-add-button="false"
-          :show-search-bar="true"
-          :server-search="true"
+          show-expand
           @load-more="loadMoreFacilityTransactions"
-        />
+        >
+          <!-- Implementação do slot custom-expanded-content -->
+          <template #custom-expanded-content="{ item: transaction }">
+            <v-list v-if="transaction.itemsTransaction && transaction.itemsTransaction.length > 0" lines="one"
+                    density="compact" class="py-0">
+              <template v-for="(transactionItem, index) in transaction.itemsTransaction" :key="transactionItem.id">
+                <v-list-item class="px-1 py-2">
+                  <v-row no-gutters align="center">
+                    <v-col cols="12" sm="5">
+                      <v-list-item-title class="font-weight-bold">{{
+                          transactionItem.product.name
+                        }}
+                      </v-list-item-title>
+                      <v-list-item-subtitle>ID Produto: {{ transactionItem.productId }}</v-list-item-subtitle>
+                    </v-col>
+                    <v-col cols="4" sm="2" class="text-sm-center">
+                      <div class="text-caption">Qtd:</div>
+                      <div>{{ transactionItem.quantity }}x</div>
+                    </v-col>
+                    <v-col cols="4" sm="2" class="text-sm-center">
+                      <div class="text-caption">Preço Un.:</div>
+                      <div>{{ formatCurrency(transactionItem.totalValue / transactionItem.quantity) }}</div>
+                    </v-col>
+                    <v-col cols="4" sm="3" class="text-sm-right">
+                      <div class="text-caption">Total Item:</div>
+                      <div class="font-weight-bold">{{ formatCurrency(transactionItem.totalValue) }}</div>
+                    </v-col>
+                  </v-row>
+                </v-list-item>
+
+                <v-divider v-if="index < transaction.itemsTransaction.length - 1" class="my-1"></v-divider>
+              </template>
+            </v-list>
+
+            <v-alert
+              v-else
+              type="info"
+              variant="tonal"
+              density="compact"
+              class="mt-2"
+              text="Nenhum item encontrado para esta transação."
+            ></v-alert>
+          </template>
+        </DefaultTable>
         <v-alert
           v-if="errorLoadingTransactions"
           type="error"
@@ -44,9 +85,9 @@
         </v-alert>
       </v-card-text>
 
-      <v-divider />
+      <v-divider/>
       <v-card-actions class="pa-3">
-        <v-spacer />
+        <v-spacer/>
         <v-btn
           color="grey-darken-1"
           variant="text"
@@ -60,11 +101,10 @@
 </template>
 
 <script lang="ts" setup>
-import {ref, watch, onMounted} from 'vue';
+import {ref, watch, onMounted, computed} from 'vue';
 import DefaultTable from "@/components/DefaultTable.vue";
-import {getFacilityTransactions} from '@/services/facilitiesService.js'; // Certifique-se que o caminho está correto
+import {getFacilityTransactions} from '@/services/facilitiesService.js';
 
-// Interfaces based on your provided API response
 interface TransactionItemProduct {
   id: number;
   name: string;
@@ -159,6 +199,7 @@ const formatTransactionData = (transaction: Transaction) => {
     ...transaction,
     totalValue: formatCurrency(transaction.totalValue),
     createdAt: formatDateTime(transaction.createdAt),
+
   };
 };
 

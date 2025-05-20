@@ -40,6 +40,7 @@
       loading-text="Carregando dados iniciais..."
       no-data-text="Nenhum dado disponível"
       :items-per-page="-1"
+      :show-expand="props.showExpand"
     >
       <template #[`item.actions`]="{ item }">
         <div class="buttons-actions">
@@ -119,6 +120,20 @@
         </v-chip>
       </template>
 
+      <template
+        v-if="props.showExpand"
+        #expanded-row="{ columns, item }"
+      >
+        <tr>
+          <td :colspan="columns.length">
+            <slot
+              name="custom-expanded-content"
+              :item="item"
+            />
+          </td>
+        </tr>
+      </template>
+
       <template #tfoot>
         <div class="text-center pa-4">
           <v-progress-circular
@@ -146,6 +161,7 @@ const props = defineProps<{
   searchPlaceholder: string
   addButtonText?: string
   showAddButton?: boolean
+  showExpand?: boolean
   showEditButton?: boolean
   showInactivateButton?: boolean
   tableItems: any[]
@@ -156,6 +172,7 @@ const props = defineProps<{
 const emit = defineEmits(["add", "edit", "toggle", "map", "load-more", "view-products"]);
 
 const search = ref("");
+const expanded = ref<any[]>([]);
 
 const filteredItems = computed(() => {
   if (!search.value) {
