@@ -253,12 +253,6 @@ function formatDateTime(dateString: string | undefined | null): string {
   }
 }
 
-watch(() => props.facilityId, (newId, oldId) => {
-  if (newId !== oldId && newId !== null && props.modelValue) {
-    resetAndLoad();
-  }
-});
-
 watch(() => props.modelValue, (newVal) => {
   if (newVal && props.facilityId) {
     resetAndLoad();
