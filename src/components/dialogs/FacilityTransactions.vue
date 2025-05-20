@@ -87,6 +87,16 @@
 
       <v-divider/>
       <v-card-actions class="pa-3">
+        <v-btn
+          color="primary"
+          variant="tonal"
+          prepend-icon="mdi-refresh"
+          :loading="isLoading"
+          :disabled="isLoading"
+          @click="resetAndLoad"
+        >
+          Atualizar
+        </v-btn>
         <v-spacer/>
         <v-btn
           color="grey-darken-1"
@@ -144,7 +154,7 @@ const isLoading = ref(false);
 const errorLoadingTransactions = ref<string | null>(null);
 
 const currentTransactionPage = ref(1);
-const itemsPerPage = ref(10); // Default page size
+const itemsPerPage = ref(10);
 const allFacilityTransactionsLoaded = ref(false);
 const currentSearchTerm = ref('');
 
@@ -212,7 +222,7 @@ const resetAndLoad = () => {
   currentTransactionPage.value = 1;
   allFacilityTransactionsLoaded.value = false;
   isLoading.value = false;
-  currentSearchTerm.value = ''; // Reset search term
+  currentSearchTerm.value = '';
   if (props.facilityId && props.modelValue) {
     fetchTransactions(1);
   }
