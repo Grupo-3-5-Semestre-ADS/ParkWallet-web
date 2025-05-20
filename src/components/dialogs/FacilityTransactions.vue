@@ -150,12 +150,10 @@ const currentSearchTerm = ref('');
 
 const transactionTableHeaders = [
   {title: "ID", key: "id", sortable: false, width: '8%'},
-  {title: "ID Usuário", key: "userId", sortable: false, width: '10%'},
-  {title: "Valor Total", key: "totalValue", sortable: false, align: 'end', width: '15%'},
-  {title: "Operação", key: "operation", sortable: false, width: '15%'},
-  {title: "Status", key: "status", sortable: false, width: '12%'},
-  {title: "Criado em", key: "createdAt", sortable: false, width: '20%'},
-  {title: "Ativo", key: "active", sortable: false, align: 'center', width: '10%'},
+  {title: "ID Usuário", key: "userId", sortable: false, width: '15%'},
+  {title: "Valor Total", key: "totalValue", sortable: false, align: 'start', width: '20%'},
+  {title: "Criado em", key: "createdAt", sortable: false, width: '25%'},
+  {title: "Status", key: "status", sortable: false, align: 'center', width: '22%'},
 ];
 
 const fetchTransactions = async (page = 1, searchTerm = '') => {
