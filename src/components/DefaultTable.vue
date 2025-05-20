@@ -1,7 +1,10 @@
 <template>
   <!-- Search Row -->
   <v-row class="align-center mb-4 flex-grow-0">
-    <v-col cols="6">
+    <v-col
+      cols="6"
+      v-if="props.showSearch"
+    >
       <v-text-field
         v-model="search"
         :label="searchPlaceholder"
@@ -13,11 +16,11 @@
       />
     </v-col>
     <v-col
+      v-if="props.showAddButton"
       cols="6"
       class="text-right"
     >
       <v-btn
-        v-if="props.showAddButton"
         color="primary"
         @click="$emit('add')"
       >
@@ -161,6 +164,7 @@ const props = defineProps<{
   searchPlaceholder: string
   addButtonText?: string
   showAddButton?: boolean
+  showSearch?: boolean
   showExpand?: boolean
   showEditButton?: boolean
   showInactivateButton?: boolean
