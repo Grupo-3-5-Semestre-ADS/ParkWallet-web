@@ -111,7 +111,7 @@
 </template>
 
 <script lang="ts" setup>
-import {ref, watch, onMounted, computed} from 'vue';
+import {ref, watch, onMounted, computed, nextTick} from 'vue';
 import DefaultTable from "@/components/DefaultTable.vue";
 import {getFacilityTransactions} from '@/services/facilitiesService.js';
 
@@ -154,7 +154,6 @@ const isLoading = ref(false);
 const errorLoadingTransactions = ref<string | null>(null);
 
 const currentTransactionPage = ref(1);
-const itemsPerPage = ref(10);
 const allFacilityTransactionsLoaded = ref(false);
 const currentSearchTerm = ref('');
 
@@ -179,13 +178,13 @@ const fetchTransactions = async (page = 1, searchTerm = '') => {
   }
 
   try {
-    const responseData = await getFacilityTransactions(props.facilityId, page, itemsPerPage.value);
+    const responseData = await getFacilityTransactions(props.facilityId, page);
 
     if (responseData && Array.isArray(responseData.data) && responseData._page) {
       transactions.value.push(...responseData.data.map(formatTransactionData));
-      currentTransactionPage.value = responseData._page.current + 1; // Prepare for next page
+      currentTransactionPage.value = responseData._page.current + 1;
       allFacilityTransactionsLoaded.value = responseData._page.current >= responseData._page.total;
-      if (responseData.data.length < itemsPerPage.value) {
+      if (responseData.data.length < 10) {
         allFacilityTransactionsLoaded.value = true;
       }
     } else {
@@ -260,20 +259,9 @@ watch(() => props.facilityId, (newId, oldId) => {
   }
 });
 
-watch(() => props.modelValue, (isVisible) => {
-  if (isVisible && props.facilityId) {
-    const firstLoadOrDifferentFacility = transactions.value.length === 0 ||
-      (transactions.value.length > 0 && transactions.value[0].itemsTransaction[0]?.product.facilityId !== props.facilityId);
-    if (firstLoadOrDifferentFacility) {
-      resetAndLoad();
-    }
-  }
-});
-
-onMounted(() => {
-  if (props.modelValue && props.facilityId) {
+watch(() => props.modelValue, (newVal) => {
+  if (newVal && props.facilityId) {
     resetAndLoad();
   }
 });
-
 </script>

@@ -111,7 +111,7 @@
 </template>
 
 <script lang="ts">
-import {onMounted, ref} from "vue";
+import {nextTick, onMounted, ref} from "vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import CreateOrEditFacilities from "@/components/dialogs/CreateOrEditFacilities.vue";
 import MapDialog from "@/components/dialogs/MapDialog.vue";
@@ -278,7 +278,10 @@ export default {
 
     const openFacilityTransactionsDialog = (item: Facility) => {
       selectedFacilityForTransactions.value = item;
-      showFacilityTransactionsModal.value = true;
+
+      nextTick(() => {
+        showFacilityTransactionsModal.value = true;
+      })
     };
 
     onMounted(() => {
