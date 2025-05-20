@@ -144,7 +144,7 @@ import {ref, computed} from "vue";
 
 const props = defineProps<{
   searchPlaceholder: string
-  addButtonText: string
+  addButtonText?: string
   showAddButton?: boolean
   showEditButton?: boolean
   showInactivateButton?: boolean

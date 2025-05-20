@@ -31,6 +31,17 @@ export const getFacilityProducts = async (id) => {
   return res.data;
 };
 
+export const getFacilityTransactions = async (id, page = 1, size = 10) => {
+  const res = await api.get(`${collection}/${id}/transactions`, {
+    params: {
+      _page: page,
+      _size: size,
+    }
+  });
+
+  return res.data;
+};
+
 export const createFacility = async (data) => {
   const res = await api.post(collection, data);
   return res.status;

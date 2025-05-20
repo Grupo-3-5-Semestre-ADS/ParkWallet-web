@@ -13,6 +13,7 @@ declare module 'vue' {
     CreateOrEditUsers: typeof import('./src/components/dialogs/CreateOrEditUsers.vue')['default']
     DefaultTable: typeof import('./src/components/DefaultTable.vue')['default']
     FacilityProducts: typeof import('./src/components/dialogs/FacilityProducts.vue')['default']
+    FacilityTransactions: typeof import('./src/components/dialogs/FacilityTransactions.vue')['default']
     MapDialog: typeof import('./src/components/dialogs/MapDialog.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

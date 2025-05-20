@@ -53,6 +53,23 @@
             </v-btn>
           </template>
         </v-tooltip>
+
+        <v-tooltip
+          text="Ver Transações"
+        >
+          <template #activator="{ props: tooltipProps }">
+            <v-btn
+              v-bind="tooltipProps"
+              icon
+              color="blue"
+              size="x-small"
+              class="mr-2"
+              @click="openFacilityTransactionsDialog(item)"
+            >
+              <v-icon>mdi-history</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
       </template>
     </DefaultTable>
 
@@ -83,6 +100,13 @@
       :facility-id="selectedFacilityForProducts.id"
       :facility-name="selectedFacilityForProducts.name"
     />
+
+    <FacilityTransactions
+      v-if="selectedFacilityForTransactions"
+      v-model="showFacilityTransactionsModal"
+      :facility-id="selectedFacilityForTransactions.id"
+      :facility-name="selectedFacilityForTransactions.name"
+    />
   </v-container>
 </template>
 
@@ -94,10 +118,11 @@ import MapDialog from "@/components/dialogs/MapDialog.vue";
 import DefaultTable from "@/components/DefaultTable.vue";
 import {createFacility, getFacilities, toggleFacilityActive, updateFacility} from '@/services/facilitiesService.js';
 import FacilityProducts from "@/components/dialogs/FacilityProducts.vue";
+import FacilityTransactions from "@/components/dialogs/FacilityTransactions.vue";
 
 export default {
   name: "FacilitiesPage",
-  components: {FacilityProducts, DefaultTable, MapDialog, ConfirmDialog, CreateOrEditFacilities},
+  components: {FacilityTransactions, FacilityProducts, DefaultTable, MapDialog, ConfirmDialog, CreateOrEditFacilities},
   setup() {
     const dialog = ref(false);
     const confirmClose = ref(false);
@@ -114,6 +139,9 @@ export default {
 
     const showFacilityProductsModal = ref(false);
     const selectedFacilityForProducts = ref<Facility | null>(null);
+
+    const showFacilityTransactionsModal = ref(false);
+    const selectedFacilityForTransactions = ref<Facility | null>(null);
 
     const headers = [
       {title: "Nome", key: "name", sortable: false},
@@ -248,6 +276,11 @@ export default {
       showFacilityProductsModal.value = true;
     };
 
+    const openFacilityTransactionsDialog = (item: Facility) => {
+      selectedFacilityForTransactions.value = item;
+      showFacilityTransactionsModal.value = true;
+    };
+
     onMounted(() => {
       resetAndLoadData();
     });
@@ -271,6 +304,9 @@ export default {
       openFacilityProductsDialog,
       editMode,
       loadMoreFacilities,
+      showFacilityTransactionsModal,
+      selectedFacilityForTransactions,
+      openFacilityTransactionsDialog,
     };
   }
 };
