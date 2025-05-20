@@ -112,6 +112,17 @@
         </v-chip>
       </template>
 
+      <template #[`item.status`]="{ item }">
+        <v-chip
+          :color="getStatusColor(item.status)"
+          text-color="white"
+          small
+          label
+        >
+          {{ getStatusName(item.status) }}
+        </v-chip>
+      </template>
+
       <template #[`item.active`]="{ item }">
         <v-chip
           :color="item.active ? 'green' : 'red'"
@@ -217,6 +228,32 @@ function getTypeName(type: number | string | undefined | null): string {
 
     case "other":
       return "Outro";
+  }
+}
+
+function getStatusName(status: number | string | undefined | null): string {
+  switch (status) {
+    case "pending":
+      return "Pendente";
+
+    case "completed":
+      return "Concluído";
+
+    case "failed":
+      return "Falhou";
+  }
+}
+
+function getStatusColor(status: number | string | undefined | null): string {
+  switch (status) {
+    case "pending":
+      return "blue";
+
+    case "completed":
+      return "green";
+
+    case "failed":
+      return "red";
   }
 }
 </script>
