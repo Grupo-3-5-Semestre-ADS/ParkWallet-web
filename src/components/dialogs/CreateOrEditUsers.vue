@@ -14,7 +14,7 @@
         <v-toolbar-title>
           {{ editMode ? "Editar Usuário" : "Adicionar Usuário" }}
         </v-toolbar-title>
-        <v-spacer />
+        <v-spacer/>
         <v-btn
           icon
           dark
@@ -60,18 +60,16 @@
           @blur="handleBlur('birthdate')"
         />
         <v-select
-          v-model="selectedRoles"
+          v-model="selectedRole"
           :items="rolesList"
           item-title="name"
-          item-value="name"
-          label="Permissões"
-          multiple
-          chips
+          item-value="value"
+          label="Permissão"
           clearable
-          :error-messages="errors.roles || rolesError"
+          :error-messages="errors.role || rolesError"
           :loading="rolesLoading"
           class="mb-3"
-          @blur="handleBlur('roles')"
+          @blur="handleBlur('role')"
         />
 
         <v-alert
@@ -92,7 +90,7 @@
         >
           Cancelar
         </v-btn>
-        <v-spacer />
+        <v-spacer/>
         <v-btn
           color="primary"
           variant="flat"
@@ -112,36 +110,48 @@ import {ref, watch, computed} from "vue";
 import * as yup from "yup";
 import {useForm, useField} from 'vee-validate';
 import {toTypedSchema} from '@vee-validate/yup';
-import {getRoles} from '@/services/rolesService.js';
 
-interface User {
+interface UserFormData {
   id?: number;
   name: string;
   email: string;
   cpf?: string;
   birthdate: string;
   active?: boolean;
-  roles?: string[];
+  role?: string;
 }
 
 interface RoleInfo {
-  id: number | string;
   name: string;
+  value: string;
 }
 
 const props = defineProps<{
   modelValue: boolean;
-  user: User | null;
+  user: UserFormData | null;
   editMode: boolean;
 }>();
 
 const emit = defineEmits(["update:modelValue", "save", "cancel"]);
 
-const rolesList = ref<RoleInfo[]>([]);
+const rolesList = ref<RoleInfo[]>([
+  {
+    name: "Cliente",
+    value: "CUSTOMER",
+  },
+  {
+    name: "Administrador",
+    value: "ADMIN",
+  },
+  {
+    name: "Vendedor",
+    value: "SELLER",
+  }
+]);
 const rolesLoading = ref(false);
 const rolesError = ref<string | null>(null);
 
-const createUserSchema = yup.object().shape({
+const userValidationSchema = yup.object().shape({
   name: yup
     .string()
     .min(2, "Nome muito curto")
@@ -161,10 +171,10 @@ const createUserSchema = yup.object().shape({
     .string()
     .matches(/^\d{4}-\d{2}-\d{2}$/, "Data deve ser YYYY-MM-DD")
     .required("Data de nascimento é obrigatória"),
-  roles: yup
-    .array()
-    .of(yup.string())
-    .optional(),
+  role: yup
+    .string()
+    .optional()
+    .nullable(),
   active: yup
     .boolean()
     .optional()
@@ -172,7 +182,7 @@ const createUserSchema = yup.object().shape({
 });
 
 const currentValidationSchema = computed(() => {
-  return toTypedSchema(createUserSchema);
+  return toTypedSchema(userValidationSchema);
 });
 
 const {
@@ -181,8 +191,7 @@ const {
   meta,
   resetForm,
   isSubmitting,
-  values,
-} = useForm<User>({
+} = useForm<UserFormData>({
   validationSchema: currentValidationSchema,
 });
 
@@ -190,10 +199,9 @@ const {value: name, handleBlur: handleNameBlur} = useField<string>('name');
 const {value: email, handleBlur: handleEmailBlur} = useField<string>('email');
 const {value: cpf, handleBlur: handleCpfBlur} = useField<string | undefined>('cpf');
 const {value: birthdate, handleBlur: handleBirthdateBlur} = useField<string>('birthdate');
-const {value: selectedRoles, handleBlur: handleRolesBlur} = useField<string[]>('roles');
+const {value: selectedRole, handleBlur: handleRoleBlur} = useField<string | undefined>('role');
 
-
-const handleBlur = (fieldName: keyof User | 'roles') => {
+const handleBlur = (fieldName: keyof UserFormData | 'role') => {
   switch (fieldName) {
     case 'name':
       handleNameBlur();
@@ -207,45 +215,25 @@ const handleBlur = (fieldName: keyof User | 'roles') => {
     case 'birthdate':
       handleBirthdateBlur();
       break;
-    case 'roles':
-      handleRolesBlur();
+    case 'role':
+      handleRoleBlur();
       break;
   }
 };
 
 const submitError = ref<string | null>(null);
 
-const fetchRoles = async () => {
-  if (rolesList.value.length > 0 && !props.editMode) return;
-  rolesLoading.value = true;
-  rolesError.value = null;
-  try {
-    const response = await getRoles();
-    rolesList.value = Array.isArray(response) ? response : (response.data || []);
+const setFormData = (userData: UserFormData | null) => {
+  const roleName = userData?.role || "";
 
-    if (rolesList.value.length === 0) {
-      rolesError.value = "Nenhuma permissão encontrada.";
-    }
-  } catch (error: any) {
-    console.error("Failed to fetch roles:", error);
-    rolesError.value = `Erro ao carregar permissões: ${error?.message || 'Erro desconhecido'}`;
-    rolesList.value = [];
-  } finally {
-    rolesLoading.value = false;
-  }
-};
-
-const setFormData = (userData: User | null) => {
-  const roleNames = userData?.roles?.map((role: any) => typeof role === 'string' ? role : role.name) || [];
-
-  const initialValues: User = {
+  const initialValues: UserFormData = {
     id: props.editMode ? userData?.id : undefined,
     name: userData?.name ?? '',
     email: userData?.email ?? '',
     cpf: userData?.cpf ?? '',
     birthdate: userData?.birthdate ?? '',
     active: userData?.active ?? true,
-    roles: roleNames,
+    role: roleName,
   };
   resetForm({values: initialValues});
 };
@@ -258,9 +246,11 @@ const onSubmit = handleSubmit(async (formData) => {
     if (dataToSave.id === undefined) {
       delete dataToSave.id;
     }
-
     if (dataToSave.cpf === '') {
-      delete dataToSave.cpf;
+      dataToSave.cpf = undefined;
+    }
+    if (dataToSave.role === null || dataToSave.role === undefined) {
+      dataToSave.role = "";
     }
 
     emit("save", dataToSave);
@@ -298,17 +288,9 @@ watch(
 watch(() => props.modelValue, (isVisible) => {
   submitError.value = null;
   if (isVisible) {
-    fetchRoles();
     setFormData(props.user);
   }
 });
-
-watch(() => props.editMode, () => {
-  if (props.modelValue) {
-    setFormData(props.user);
-  }
-});
-
 </script>
 
 <style scoped>

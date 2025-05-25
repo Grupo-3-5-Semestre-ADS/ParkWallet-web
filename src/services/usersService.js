@@ -26,6 +26,11 @@ export const getUser = async (id) => {
   return res.data;
 };
 
+export const addUser = async (id, data) => {
+  const res = await api.put(collection, data);
+  return res.status;
+};
+
 export const updateUser = async (id, data) => {
   const res = await api.put(`${collection}/${id}`, data);
   return res.status;
@@ -36,13 +41,8 @@ export const toggleUserActive = async (id) => {
   return res.status;
 };
 
-export const addUserRoles = async (id, data) => {
-  const res = await api.patch(`${collection}/${id}/add-roles`, data);
-  return res.status;
-};
-
-export const removeUserRoles = async (id, data) => {
-  const res = await api.patch(`${collection}/${id}/remove-roles`, data);
+export const updateUserRole = async (id, data) => {
+  const res = await api.patch(`${collection}/${id}/role`, data);
   return res.status;
 };
 

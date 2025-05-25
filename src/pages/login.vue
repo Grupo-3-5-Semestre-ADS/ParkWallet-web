@@ -129,8 +129,8 @@ export default {
         }
         const response = await login(credentials)
 
-        if (response.data && response.data.token) {
-          localStorage.setItem('authToken', response.data.token)
+        if (response && response.token) {
+          localStorage.setItem('authToken', response.token)
           await router.push('/facilities')
         } else {
           errorMessage.value = 'Resposta de login inesperada. Tente novamente.'

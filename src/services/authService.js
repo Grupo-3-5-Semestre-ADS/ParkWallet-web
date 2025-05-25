@@ -10,10 +10,7 @@ const api = axios.create({
 
 export const login = async (data) => {
   const res = await api.post("/login", data);
-
-  console.log(res)
-
-  return res;
+  return res.data;
 };
 
 export default api;

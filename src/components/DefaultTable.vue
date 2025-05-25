@@ -1,11 +1,9 @@
 <template>
   <!-- Search Row -->
   <v-row class="align-center mb-4 flex-grow-0">
-    <v-col
-      cols="6"
-      v-if="props.showSearch"
-    >
+    <v-col cols="6">
       <v-text-field
+        v-if="props.showSearch"
         v-model="search"
         :label="searchPlaceholder"
         variant="outlined"
@@ -98,17 +96,15 @@
         {{ getTypeName(item.type) }}
       </template>
 
-      <template #[`item.roles`]="{ item }">
+      <template #[`item.role`]="{ item }">
         <v-chip
-          v-for="role in item.roles"
-          :key="role.UserRoles.id"
           color="blue"
           text-color="white"
           small
           label
           class="mr-2"
         >
-          {{ role.name }}
+          {{ getRoleName(item.role) }}
         </v-chip>
       </template>
 
@@ -241,6 +237,19 @@ function getStatusName(status: number | string | undefined | null): string {
 
     case "failed":
       return "Falhou";
+  }
+}
+
+function getRoleName(role: number | string | undefined | null): string {
+  switch (role) {
+    case "CUSTOMER":
+      return "Cliente";
+
+    case "ADMIN":
+      return "Administrador";
+
+    case "SELLER":
+      return "Vendedor";
   }
 }
 

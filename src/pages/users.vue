@@ -35,16 +35,16 @@
 </template>
 
 <script lang="ts">
-import { onMounted, ref } from "vue";
+import {onMounted, ref} from "vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import CreateOrEditUsers from "@/components/dialogs/CreateOrEditUsers.vue";
 import DefaultTable from "@/components/DefaultTable.vue";
 import {
   getUsers,
   updateUser,
-  toggleUserActive,
-  addUserRoles,
-  removeUserRoles
+  addUser,
+  updateUserRole,
+  toggleUserActive
 } from "@/services/usersService.js";
 
 interface UserForPage {
@@ -55,19 +55,19 @@ interface UserForPage {
   birthdate?: string;
   active: boolean;
   password?: string;
-  roles?: any[];
+  role?: string;
 }
 
 export default {
   name: "UsersPage",
-  components: { DefaultTable, ConfirmDialog, CreateOrEditUsers },
+  components: {DefaultTable, ConfirmDialog, CreateOrEditUsers},
   setup() {
     const dialog = ref(false);
     const confirmClose = ref(false);
     const editMode = ref(false);
 
     const initialUser: UserForPage = {
-        id: null, name: "", email: "", cpf: "", birthdate: "", active: true, roles: []
+      id: null, name: "", email: "", cpf: "", birthdate: "", active: true, role: ""
     };
     const currentUser = ref<UserForPage | null>({...initialUser});
 
@@ -78,13 +78,13 @@ export default {
     const allItemsLoaded = ref(false);
 
     const headers = [
-      { title: "Nome", key: "name", sortable: false },
-      { title: "E-mail", key: "email", sortable: false },
-      { title: "CPF", key: "cpf", sortable: false },
-      { title: "Data de Nascimento", key: "birthdate", sortable: false },
-      { title: "Permissões", key: "roles", sortable: false },
-      { title: "Ativo", key: "active", sortable: false },
-      { title: "Ações", key: "actions", sortable: false }
+      {title: "Nome", key: "name", sortable: false},
+      {title: "E-mail", key: "email", sortable: false},
+      {title: "CPF", key: "cpf", sortable: false},
+      {title: "Data de Nascimento", key: "birthdate", sortable: false},
+      {title: "Permissão", key: "role", sortable: false},
+      {title: "Ativo", key: "active", sortable: false},
+      {title: "Ações", key: "actions", sortable: false}
     ];
 
     const fetchUsersPage = async () => {
@@ -97,7 +97,11 @@ export default {
         const response = await getUsers(currentPage.value, itemsPerPage.value);
         if (response && response.data && response._page) {
           if (response.data.length > 0) {
-            users.value.push(...response.data);
+            const mappedData = response.data.map((user: any) => ({
+              ...user,
+              role: typeof user.role === 'object' && user.role !== null ? user.role.name : user.role || ""
+            }));
+            users.value.push(...mappedData);
             currentPage.value++;
           }
 
@@ -106,11 +110,10 @@ export default {
           }
         } else {
           console.error("Invalid data structure received from API for pagination:", response);
-          allItemsLoaded.value = true; // Stop trying if structure is wrong
+          allItemsLoaded.value = true;
         }
       } catch (error) {
         console.error("Failed to fetch users page:", error);
-        // Potentially set an error state to show user
       } finally {
         isLoading.value = false;
       }
@@ -124,21 +127,18 @@ export default {
       users.value = [];
       currentPage.value = 1;
       allItemsLoaded.value = false;
-      isLoading.value = false; // Reset loading state
+      isLoading.value = false;
       await fetchUsersPage();
     };
 
     const openDialog = () => {
-      currentUser.value = { ...initialUser };
+      currentUser.value = {...initialUser};
       editMode.value = false;
       dialog.value = true;
     };
 
     const editUser = async (item: UserForPage) => {
-      // Optionally, fetch full user details if `item` from table is partial
-      // For now, assume `item` has all necessary fields including 'roles'
-      // If not, const fullUser = await getUserById(item.id); currentUser.value = {...fullUser};
-      currentUser.value = { ...item };
+      currentUser.value = {...item};
       editMode.value = true;
       dialog.value = true;
     };
@@ -146,28 +146,32 @@ export default {
     const onSaveUser = async (formData: UserForPage) => {
       isLoading.value = true;
       let success = false;
-      const { roles: newRoleNames, ...userData } = formData; // formData.roles are role names from the dialog
+      const {role: newRoleName, ...userData} = formData;
 
       try {
         if (editMode.value && userData.id) {
-          const originalUser = users.value.find(u => u.id === userData.id);
-          const originalRoleNames = originalUser?.roles?.map((r: any) => r.name || r) || [];
-
-
-          // API expects password only if it's being changed. Dialog handles this logic.
           const updateStatusCode = await updateUser(userData.id, userData);
 
-          if (updateStatusCode === 200) { // Or appropriate success code
-            const rolesToAdd = newRoleNames?.filter(r => !originalRoleNames.includes(r)) || [];
-            const rolesToRemove = originalRoleNames?.filter(r => !newRoleNames?.includes(r)) || [];
+          if (updateStatusCode === 200) {
+            const originalUser = users.value.find(u => u.id === userData.id);
+            const originalRoleName = originalUser?.role || "";
 
-            // Parallel role updates can be complex if one fails. Sequential might be safer.
-            if (rolesToAdd.length > 0) await addUserRoles(userData.id, { roles: rolesToAdd });
-            if (rolesToRemove.length > 0) await removeUserRoles(userData.id, { roles: rolesToRemove });
-
+            if (newRoleName !== undefined && newRoleName !== originalRoleName) {
+              await updateUserRole(userData.id, {role: newRoleName});
+            }
             success = true;
           } else {
             console.error("Update user failed with status:", updateStatusCode);
+          }
+        } else {
+          const userToCreate = {...userData, role: newRoleName};
+          delete userToCreate.id;
+
+          const createdUserResponse = await addUser(userToCreate);
+          if (createdUserResponse && (createdUserResponse.id || createdUserResponse.status === 201 || createdUserResponse.status === 200)) {
+            success = true;
+          } else {
+            console.error("Create user failed:", createdUserResponse);
           }
         }
 
@@ -179,9 +183,8 @@ export default {
         console.error("Error saving user:", error);
       } finally {
         if (!success) {
-             isLoading.value = false;
+          isLoading.value = false;
         }
-        // isLoading is set to false by resetAndLoadData on success
       }
     };
 
@@ -197,7 +200,6 @@ export default {
 
       try {
         const statusCode = await toggleUserActive(item.id);
-        console.log(statusCode)
         if (statusCode !== 200) {
           if (index !== -1) {
             users.value[index].active = originalStatus;
@@ -239,7 +241,7 @@ export default {
   display: flex;
   flex-direction: column;
   background: rgba(255, 255, 255, 0.9);
-  overflow-y: hidden; /* Or auto/scroll if content exceeds height */
+  overflow-y: hidden;
   height: 100%;
 }
 </style>
