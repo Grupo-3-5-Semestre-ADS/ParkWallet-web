@@ -12,7 +12,11 @@ const api = axios.create({
 
 export const listUserChats = async (userId) => {
   const res = await api.get(`${collection}/${userId}`);
+  return res.data;
+};
 
+export const listConversations = async () => {
+  const res = await api.get(`${collection}/conversations`);
   return res.data;
 };
 

@@ -259,7 +259,6 @@ const onSubmit = handleSubmit(async (formData) => {
     submitError.value = "Ocorreu um erro ao salvar o usuário. Tente novamente.";
   }
 }, (context) => {
-  console.log("Form validation failed:", context.errors);
   submitError.value = "Por favor, corrija os erros no formulário.";
 });
 

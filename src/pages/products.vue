@@ -80,8 +80,6 @@ export default {
       try {
         const response = await getProducts(currentPage.value, itemsPerPage.value);
 
-        console.log(response)
-
         if (response && response.data && response._page) {
           if (response.data.length > 0) {
             products.value.push(...response.data);

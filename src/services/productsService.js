@@ -27,7 +27,6 @@ export const getProduct = async (id) => {
 };
 
 export const createProduct = async (data) => {
-  console.log(data)
   const res = await api.post(collection, data);
   return res.data;
 };

@@ -9,7 +9,15 @@
         <v-list>
           <v-list-item-title class="pa-4 text-h6">Conversas</v-list-item-title>
           <v-divider></v-divider>
+          <div v-if="isLoadingClients" class="text-center pa-4">
+            <v-progress-circular indeterminate color="primary"></v-progress-circular>
+            <p>Carregando conversas...</p>
+          </div>
+          <div v-else-if="clients.length === 0 && !isLoadingClients" class="text-center text-grey pa-5">
+            Nenhuma conversa encontrada.
+          </div>
           <v-list-item
+            v-else
             v-for="client in clients"
             :key="client.id"
             @click="selectClient(client)"
@@ -33,6 +41,7 @@
         </v-list>
       </v-col>
 
+      <!-- Área do Chat -->
       <v-col cols="12" md="8" class="d-flex flex-column pl-md-4 chat-area-container">
         <div v-if="selectedClient" class="d-flex flex-column fill-height">
           <v-toolbar density="compact" color="transparent">
@@ -99,13 +108,19 @@
 <script setup lang="ts">
 import {nextTick, onMounted, onUnmounted, ref, watch} from 'vue';
 import {io, Socket} from 'socket.io-client';
-import {listUserChats as fetchUserChatHistory} from '@/services/chatService.js';
+import { listConversations, listUserChats } from '@/services/chatService.js';
 
 interface Client {
   id: number;
   name: string;
   lastMessage: string;
   unreadCount?: number;
+}
+
+interface ApiConversation {
+  userId: number;
+  userName: string;
+  lastMessage: string;
 }
 
 interface Message {
@@ -129,14 +144,11 @@ interface ServerMessage {
 const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL || 'http://localhost:8080';
 
 const myUserId = ref(1);
-const clients = ref<Client[]>([
-  {id: 2, name: 'Maria Oliveira', lastMessage: 'Vamos conversar!'},
-  {id: 3, name: 'Pedro Santos', lastMessage: 'Preciso de ajuda.'},
-  {id: 4, name: 'Ana Costa', lastMessage: 'Agendado!'}
-]);
+const clients = ref<Client[]>([]);
 const selectedClient = ref<Client | null>(null);
 const messages = ref<Message[]>([]);
 const newMessage = ref('');
+const isLoadingClients = ref(false);
 const isLoadingMessages = ref(false);
 const messageContainer = ref<HTMLElement | null>(null);
 
@@ -166,6 +178,23 @@ function transformServerMessageToUIMessage(serverMsg: ServerMessage, currentUser
   };
 }
 
+async function loadConversations() {
+  isLoadingClients.value = true;
+  try {
+    const apiConversations: ApiConversation[] = await listConversations();
+    clients.value = apiConversations.map(conv => ({
+      id: conv.userId,
+      name: conv.userName,
+      lastMessage: conv.lastMessage,
+    }));
+  } catch (error) {
+    console.error('Erro ao carregar conversas:', error);
+    clients.value = [];
+  } finally {
+    isLoadingClients.value = false;
+  }
+}
+
 async function loadChatHistory(partnerId: number) {
   if (!myUserId.value) {
     console.error("myUserId não está definido. Impossível carregar histórico.");
@@ -176,9 +205,7 @@ async function loadChatHistory(partnerId: number) {
   messages.value = [];
 
   try {
-    const allUserMessages: ServerMessage[] = await fetchUserChatHistory(myUserId.value);
-
-    console.log(allUserMessages)
+    const allUserMessages: ServerMessage[] = await listUserChats(myUserId.value);
 
     messages.value = allUserMessages
       .filter(msg =>
@@ -210,12 +237,12 @@ function sendMessage() {
   }
 
   const messagePayload = {
+    senderUserId: myUserId.value,
     recipientUserId: selectedClient.value.id,
     message: newMessage.value.trim(),
   };
 
   socket.emit('send_message', messagePayload);
-
   newMessage.value = '';
 }
 
@@ -223,7 +250,6 @@ function setupSocketListeners() {
   if (!socket) return;
 
   socket.on('connect', () => {
-    console.log('Conectado ao Gateway via Socket.IO:', socket?.id);
     if (myUserId.value) {
       socket?.emit('user_online', {userId: myUserId.value});
     } else {
@@ -231,12 +257,7 @@ function setupSocketListeners() {
     }
   });
 
-  socket.on('online_ack', (data: { message: string }) => {
-    console.log('Socket Online ACK:', data.message);
-  });
-
   socket.on('receive_message', (serverMsg: ServerMessage) => {
-    console.log('Mensagem recebida do servidor:', serverMsg);
     const uiMessage = transformServerMessageToUIMessage(serverMsg, myUserId.value);
 
     if (selectedClient.value &&
@@ -247,71 +268,63 @@ function setupSocketListeners() {
       scrollToBottom();
     }
 
-    const clientInList = clients.value.find(c => c.id === uiMessage.senderUserId || c.id === uiMessage.recipientUserId);
-    if (clientInList && clientInList.id !== myUserId.value) {
-      const relevantUserIdForClientList = uiMessage.senderUserId === myUserId.value ? uiMessage.recipientUserId : uiMessage.senderUserId;
-      const clientToUpdate = clients.value.find(c => c.id === relevantUserIdForClientList);
-      if (clientToUpdate) {
-        clientToUpdate.lastMessage = uiMessage.text;
-      }
+    const relevantClientUserId = serverMsg.senderUserId === myUserId.value ? serverMsg.recipientUserId : serverMsg.senderUserId;
+    const clientInList = clients.value.find(c => c.id === relevantClientUserId);
+
+    if (clientInList) {
+      clientInList.lastMessage = uiMessage.text;
+      clients.value = [clientInList, ...clients.value.filter(c => c.id !== clientInList.id)];
+    } else {
+        console.warn(`Cliente com ID ${relevantClientUserId} não encontrado na lista. Pode ser uma nova conversa.`);
     }
   });
 
   socket.on('message_sent_ack', (serverMsg: ServerMessage) => {
-    console.log('ACK: Mensagem enviada e salva:', serverMsg);
     const uiMessage = transformServerMessageToUIMessage(serverMsg, myUserId.value);
 
     if (selectedClient.value &&
-      ((uiMessage.senderUserId === myUserId.value && uiMessage.recipientUserId === selectedClient.value.id) ||
-        (uiMessage.senderUserId === selectedClient.value.id && uiMessage.recipientUserId === myUserId.value))
-    ) {
-      const existingMsg = messages.value.find(m => m.id === uiMessage.id && m.id !== undefined);
-      if (!existingMsg) {
+        ((uiMessage.senderUserId === myUserId.value && uiMessage.recipientUserId === selectedClient.value.id) ||
+         (uiMessage.senderUserId === selectedClient.value.id && uiMessage.recipientUserId === myUserId.value))
+       ) {
+      const existingMsgIndex = messages.value.findIndex(m => m.id === uiMessage.id && m.id !== undefined);
+      if (existingMsgIndex === -1) {
         messages.value.push(uiMessage);
         scrollToBottom();
+      } else {
+        messages.value[existingMsgIndex] = uiMessage;
       }
     }
 
     const clientToUpdate = clients.value.find(c => c.id === serverMsg.recipientUserId);
     if (clientToUpdate) {
       clientToUpdate.lastMessage = serverMsg.message;
+      clients.value = [clientToUpdate, ...clients.value.filter(c => c.id !== clientToUpdate.id)];
     }
   });
 
   socket.on('error_message', (error: { message: string; details?: any }) => {
     console.error('Erro do servidor Socket:', error.message, error.details);
   });
-
-  socket.on('disconnect', (reason: string) => {
-    console.log('Desconectado do Gateway:', reason);
-  });
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (!myUserId.value) {
     console.error("ID do usuário não definido. Chat não pode ser inicializado.");
     return;
   }
 
-  socket = io(GATEWAY_URL, {
-  });
+  await loadConversations();
+
+  socket = io(GATEWAY_URL, {});
   setupSocketListeners();
 });
 
 onUnmounted(() => {
   if (socket) {
-    console.log("Desconectando socket...");
     socket.disconnect();
     socket = null;
   }
 });
-
-watch(selectedClient, (newClient, oldClient) => {
-  if (newClient && (!oldClient || newClient.id !== oldClient.id)) {
-    console.log(`Conversa selecionada: ${newClient.name}`);
-  }
-});
-
 </script>
 
 <style scoped>
@@ -352,6 +365,10 @@ watch(selectedClient, (newClient, oldClient) => {
     border-right: none !important;
     border-bottom: 1px solid #ccc;
     max-height: 30vh;
+  }
+
+  .chat-area-container {
+    padding-left: 0 !important;
   }
 
   .page-container {
