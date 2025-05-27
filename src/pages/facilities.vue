@@ -12,12 +12,14 @@
       show-add-button
       show-edit-button
       show-inactivate-button
+      show-search
       @add="openDialog"
       @edit="editFacility"
       @toggle="toggleActive"
       @map="openMap"
       @load-more="loadMoreFacilities"
       @view-products="openFacilityProductsDialog"
+      @search-updated="handleSearch"
     >
       <template #custom-actions="{ item }">
         <v-tooltip
@@ -136,6 +138,7 @@ export default {
     const currentPage = ref(1);
     const itemsPerPage = ref(20);
     const allItemsLoaded = ref(false);
+    const currentSearchQuery = ref("");
 
     const showFacilityProductsModal = ref(false);
     const selectedFacilityForProducts = ref<Facility | null>(null);
@@ -161,22 +164,36 @@ export default {
       isLoading.value = true;
 
       try {
-        const response = await getFacilities(currentPage.value, itemsPerPage.value);
+        const response = await getFacilities(currentPage.value, itemsPerPage.value, currentSearchQuery.value);
 
         if (response && response.data && response._page) {
-          if (response.data.length > 0) {
-            facilities.value.push(...response.data);
-            currentPage.value++;
+          const newItems = response.data;
+
+          if (currentPage.value === 1) {
+            facilities.value = newItems;
+          } else {
+            facilities.value.push(...newItems);
           }
 
           if (response._page.current >= response._page.total) {
             allItemsLoaded.value = true;
+          } else {
+            allItemsLoaded.value = false;
+            currentPage.value++;
+          }
+
+          if (newItems.length === 0 && response._page.current === response._page.total) {
+            allItemsLoaded.value = true;
           }
         } else {
           console.error("Invalid data structure received from API for pagination:", response);
+
+          if (currentPage.value === 1) {
+            facilities.value = [];
+          }
+
           allItemsLoaded.value = true;
         }
-
       } catch (error) {
         console.error("Failed to fetch facilities page:", error);
       } finally {
@@ -188,13 +205,17 @@ export default {
       fetchFacilitiesPage();
     };
 
-    const resetAndLoadData = async () => {
+    const resetAndLoadData = async (searchQuery: string = "") => {
+      currentSearchQuery.value = searchQuery;
       facilities.value = [];
       currentPage.value = 1;
       allItemsLoaded.value = false;
       await fetchFacilitiesPage();
     };
 
+    const handleSearch = (searchTerm: string) => {
+      resetAndLoadData(searchTerm);
+    };
 
     const openDialog = () => {
       facility.value = {id: null, name: "", description: "", type: "", latitude: "", longitude: ""};
@@ -209,9 +230,7 @@ export default {
     };
 
     const onSaveFacility = async (data: any) => {
-      isLoading.value = true;
       let success = false;
-
       try {
         if (editMode.value) {
           const statusCode = await updateFacility(data.id, data);
@@ -238,8 +257,9 @@ export default {
       } catch (error) {
         console.error("Error saving facility:", error);
       } finally {
-        if (!success) isLoading.value = false;
-        dialog.value = false;
+        if (success) {
+          dialog.value = false;
+        }
       }
     };
 
@@ -310,6 +330,7 @@ export default {
       showFacilityTransactionsModal,
       selectedFacilityForTransactions,
       openFacilityTransactionsDialog,
+      handleSearch
     };
   }
 };

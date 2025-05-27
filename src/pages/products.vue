@@ -4,7 +4,7 @@
     class="page-container rounded elevation-4"
   >
     <DefaultTable
-      search-placeholder="Buscar Produto"
+      search-placeholder="Buscar Produtos"
       add-button-text="Adicionar Produto"
       :table-items="products"
       :headers="headers"
@@ -12,10 +12,12 @@
       show-add-button
       show-edit-button
       show-inactivate-button
+      show-search
       @add="openDialog"
       @edit="editProduct"
       @toggle="toggleActive"
       @load-more="loadMoreProducts"
+      @search-updated="handleSearch"
     />
 
     <CreateOrEditProducts
@@ -61,6 +63,7 @@ export default {
     const currentPage = ref(1);
     const itemsPerPage = ref(20);
     const allItemsLoaded = ref(false);
+    const currentSearchQuery = ref("");
 
     const headers = [
       {title: "Nome", key: "name", sortable: false},
@@ -78,19 +81,34 @@ export default {
       isLoading.value = true;
 
       try {
-        const response = await getProducts(currentPage.value, itemsPerPage.value);
+        const response = await getProducts(currentPage.value, itemsPerPage.value, currentSearchQuery.value);
 
         if (response && response.data && response._page) {
-          if (response.data.length > 0) {
-            products.value.push(...response.data);
-            currentPage.value++;
+          const newItems = response.data;
+
+          if (currentPage.value === 1) {
+            products.value = newItems;
+          } else {
+            products.value.push(...newItems);
           }
 
           if (response._page.current >= response._page.total) {
             allItemsLoaded.value = true;
+          } else {
+            allItemsLoaded.value = false;
+            currentPage.value++;
+          }
+
+          if (newItems.length === 0 && response._page.current === response._page.total) {
+            allItemsLoaded.value = true;
           }
         } else {
           console.error("Invalid data structure received from API for pagination:", response);
+
+          if (currentPage.value === 1) {
+            products.value = [];
+          }
+
           allItemsLoaded.value = true;
         }
       } catch (error) {
@@ -104,12 +122,16 @@ export default {
       fetchProductsPage();
     };
 
-    const resetAndLoadData = async () => {
+    const resetAndLoadData = async (searchQuery: string = "") => {
+      currentSearchQuery.value = searchQuery;
       products.value = [];
       currentPage.value = 1;
       allItemsLoaded.value = false;
-      isLoading.value = false;
       await fetchProductsPage();
+    };
+
+    const handleSearch = (searchTerm: string) => {
+      resetAndLoadData(searchTerm);
     };
 
     const openDialog = () => {
@@ -125,7 +147,6 @@ export default {
     };
 
     const onSaveProduct = async (data: any) => {
-      isLoading.value = true;
       let success = false;
       try {
         if (editMode.value) {
@@ -147,14 +168,12 @@ export default {
         if (success) {
           await resetAndLoadData();
         }
-
       } catch (error) {
         console.error("Error saving product:", error);
       } finally {
-        if (!success) {
-          isLoading.value = false;
+        if (success) {
+          dialog.value = false;
         }
-        dialog.value = false;
       }
     };
 
@@ -199,6 +218,7 @@ export default {
       toggleActive,
       editMode,
       loadMoreProducts,
+      handleSearch
     };
   }
 };
