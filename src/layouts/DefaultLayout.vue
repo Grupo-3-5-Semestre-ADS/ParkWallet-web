@@ -32,51 +32,63 @@
       app
       class="d-flex flex-column h-100"
     >
-      <v-list>
-        <v-list-item
-          prepend-avatar="https://randomuser.me/api/portraits/men/85.jpg"
-          subtitle="user1@gmailcom"
-          title="User 1"
-        />
-      </v-list>
-      <v-divider />
-      <v-list
-        nav
-        density="comfortable"
-      >
-        <v-list-item
-          to="/facilities"
-          prepend-icon="mdi-store"
+      <div class="d-flex flex-column h-100">
+        <v-list>
+          <v-list-item
+            prepend-icon="mdi-account"
+            subtitle="user1@gmailcom"
+            title="User 1"
+          />
+        </v-list>
+
+        <v-divider />
+
+        <v-list
+          nav
+          density="comfortable"
         >
-          Estabelecimentos
-        </v-list-item>
-        <v-list-item
-          to="/products"
-          prepend-icon="mdi-package-variant"
+          <v-list-item
+            to="/facilities"
+            prepend-icon="mdi-store"
+          >
+            Estabelecimentos
+          </v-list-item>
+          <v-list-item
+            to="/products"
+            prepend-icon="mdi-package-variant"
+          >
+            Produtos
+          </v-list-item>
+          <v-list-item
+            to="/users"
+            prepend-icon="mdi-account-group"
+          >
+            Usuários
+          </v-list-item>
+          <v-list-item
+            to="/support"
+            prepend-icon="mdi-chat"
+          >
+            Suporte
+          </v-list-item>
+        </v-list>
+
+        <div class="navigator-spacer" />
+
+        <v-list
+          nav
+          density="comfortable"
         >
-          Produtos
-        </v-list-item>
-        <v-list-item
-          to="/users"
-          prepend-icon="mdi-account-group"
-        >
-          Usuários
-        </v-list-item>
-        <v-list-item
-          to="/support"
-          prepend-icon="mdi-chat"
-        >
-          Suporte
-        </v-list-item>
-        <v-list-item to="/login">
-          <template #prepend>
-            <v-icon color="error">
-              mdi-logout
-            </v-icon>
-          </template>
-          Sair
-        </v-list-item>
-      </v-list>
+          <v-list-item to="/login">
+            <template #prepend>
+              <v-icon color="error">
+                mdi-logout
+              </v-icon>
+            </template>
+            Sair
+          </v-list-item>
+        </v-list>
+      </div>
     </v-navigation-drawer>
 
     <v-main class="background-container">
@@ -134,5 +146,9 @@ const toggleDrawer = () => {
 .logo-img {
   max-height: 60px;
   width: auto;
+}
+
+.navigator-spacer {
+  height: calc(100% - 397px);
 }
 </style>
