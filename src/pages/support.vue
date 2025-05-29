@@ -316,7 +316,6 @@ function sendMessage() {
     message: messageText,
   };
 
-  // Adicionar mensagem localmente para UX imediata
   const localMessage: Message = {
     id: `temp-${Date.now()}`,
     from: 'me',
@@ -329,11 +328,8 @@ function sendMessage() {
   messages.value.push(localMessage);
   scrollToBottom();
 
-  // Limpar campo antes de enviar
   newMessage.value = '';
 
-  // Enviar mensagem via socket
-  console.log('Enviando mensagem:', messagePayload);
   socket.emit('send_message', messagePayload);
 }
 
@@ -371,9 +367,6 @@ function setupSocketListeners() {
   });
 
   socket.on('message_sent_ack', (serverMsg: ServerMessage) => {
-    console.log('Mensagem enviada confirmada:', serverMsg);
-
-    // Atualizar a mensagem local temporária com o ID real do servidor
     if (selectedClient.value && serverMsg.recipientUserId === selectedClient.value.id) {
       const tempMsgIndex = messages.value.findIndex(m =>
         m.from === 'me' &&
@@ -383,7 +376,6 @@ function setupSocketListeners() {
       );
 
       if (tempMsgIndex !== -1) {
-        // Atualizar com dados reais do servidor
         messages.value[tempMsgIndex] = {
           ...messages.value[tempMsgIndex],
           id: serverMsg.id,
@@ -392,7 +384,6 @@ function setupSocketListeners() {
       }
     }
 
-    // Atualizar a última mensagem na lista de clientes
     const clientToUpdate = clients.value.find(c => c.id === serverMsg.recipientUserId);
     if (clientToUpdate) {
       clientToUpdate.lastMessage = serverMsg.message;
