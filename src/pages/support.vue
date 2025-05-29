@@ -109,19 +109,26 @@
             >
               <div :class="msg.from === 'me' ? 'd-flex justify-end' : 'd-flex justify-start'">
                 <v-chip
-                  :color="msg.from === 'me' ? 'primary' : 'grey-lighten-1'"
+                  :color="msg.from === 'me' ? 'primary' : ''"
                   :class="msg.from === 'me' ? 'text-white' : ''"
-                  class="ma-1 pa-3"
-                  style="max-width: 70%; height: auto; white-space: normal;"
+                  :style="{
+                    maxWidth: '70%',
+                    height: 'auto',
+                    whiteSpace: 'normal',
+                    borderRadius: msg.from === 'me' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                    padding: '0px'
+                  }"
                 >
-                  <div class="message-text">
-                    {{ msg.text }}
-                  </div>
-                  <div
-                    class="text-caption mt-1"
-                    :class="msg.from === 'me' ? 'text-blue-lighten-4' : 'text-grey-darken-1'"
-                  >
-                    {{ formatTimestamp(msg.timestamp) }}
+                  <div class="message-content">
+                    <div class="message-text">
+                      {{ msg.text }}
+                    </div>
+                    <div
+                      class="text-caption"
+                      :class="msg.from === 'me' ? 'text-blue-lighten-1' : 'text-grey-darken-1'"
+                    >
+                      {{ formatTimestamp(msg.timestamp) }}
+                    </div>
                   </div>
                 </v-chip>
               </div>
@@ -173,9 +180,9 @@
 </template>
 
 <script setup lang="ts">
-import {nextTick, onMounted, onUnmounted, ref, watch} from 'vue';
+import {nextTick, onMounted, onUnmounted, ref} from 'vue';
 import {io, Socket} from 'socket.io-client';
-import { listConversations, listUserChats } from '@/services/chatService.js';
+import {listConversations, listUserChats} from '@/services/chatService.js';
 
 interface Client {
   id: number;
@@ -359,7 +366,7 @@ function setupSocketListeners() {
       clientInList.lastMessage = uiMessage.text;
       clients.value = [clientInList, ...clients.value.filter(c => c.id !== clientInList.id)];
     } else {
-        console.warn(`Cliente com ID ${relevantClientUserId} não encontrado na lista. Pode ser uma nova conversa.`);
+      console.warn(`Cliente com ID ${relevantClientUserId} não encontrado na lista. Pode ser uma nova conversa.`);
     }
   });
 
@@ -449,6 +456,17 @@ onUnmounted(() => {
 
 .message-text {
   word-break: break-word;
+}
+
+.message-content {
+  position: relative;
+  padding: 10px 24px 24px 10px;
+}
+
+.text-caption {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
 }
 
 @media (max-width: 959px) {
