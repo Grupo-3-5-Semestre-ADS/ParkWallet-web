@@ -118,6 +118,14 @@
         </v-chip>
       </template>
 
+      <template #[`item.cpf`]="{ item }">
+        {{ formatCpf(item.cpf) }}
+      </template>
+
+      <template #[`item.birthdate`]="{ item }">
+        {{ formatBirthdate(item.birthdate) }}
+      </template>
+
       <template #[`item.active`]="{ item }">
         <v-chip
           :color="item.active ? 'green' : 'red'"
@@ -207,6 +215,23 @@ function formatCurrency(value: number | string | undefined | null): string {
     style: 'currency',
     currency: 'BRL'
   });
+}
+
+function formatCpf(value: string): string {
+  if (!value) {
+    return "CPF não informado";
+  }
+
+  if (value.length !== 11) {
+    return "CPF inválido";
+  }
+
+  return `${value.substring(0, 3)}.${value.substring(3, 6)}.${value.substring(6, 9)}-${value.substring(9, 11)}`;
+}
+
+function formatBirthdate(value: string): string {
+  const [year, month, day] = value.split('-');
+  return `${day}/${month}/${year}`;
 }
 
 function getTypeName(type: string): string {
