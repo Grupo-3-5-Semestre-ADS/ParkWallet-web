@@ -10,7 +10,7 @@
         density="compact"
         clearable
         hide-details
-        placeholder="Filtrar resultados carregados..."
+        @update:model-value="onSearchInput"
       />
     </v-col>
     <v-col
@@ -29,10 +29,9 @@
 
   <v-row class="flex-grow-1">
     <v-data-table
-      :items="filteredItems"
+      :items="props.tableItems"
       :headers="headers"
-      :loading="props.loading && filteredItems.length === 0"
-      :search="search"
+      :loading="props.loading && props.tableItems.length === 0"
       item-value="id"
       class="full-height transparent-background"
       hide-default-footer
@@ -147,7 +146,7 @@
       <template #tfoot>
         <div class="text-center pa-4">
           <v-progress-circular
-            v-if="props.loading && filteredItems.length > 0"
+            v-if="props.loading && props.tableItems.length > 0"
             indeterminate
             color="primary"
             size="24"
@@ -165,7 +164,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed} from "vue";
+import {ref} from "vue";
 
 const props = defineProps<{
   searchPlaceholder: string
@@ -180,22 +179,18 @@ const props = defineProps<{
   loading: boolean
 }>();
 
-const emit = defineEmits(["add", "edit", "toggle", "map", "load-more", "view-products"]);
+const emit = defineEmits(["add", "edit", "toggle", "map", "load-more", "view-products", "search-updated"]);
 
 const search = ref("");
-const expanded = ref<any[]>([]);
 
-const filteredItems = computed(() => {
-  if (!search.value) {
-    return props.tableItems;
-  }
-  const searchTerm = search.value.toLowerCase();
-  return props.tableItems.filter(item =>
-    (item.name && item.name.toLowerCase().includes(searchTerm)) ||
-    (item.description && item.description.toLowerCase().includes(searchTerm)) ||
-    (item.type && item.type.toLowerCase().includes(searchTerm))
-  );
-});
+let searchDebounceTimer: number | undefined;
+
+const onSearchInput = (value: string | null) => {
+  clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = window.setTimeout(() => {
+    emit('search-updated', value || "");
+  }, 500);
+};
 
 const onIntersect = (isIntersecting: boolean) => {
   if (isIntersecting && !props.loading) {
@@ -214,7 +209,7 @@ function formatCurrency(value: number | string | undefined | null): string {
   });
 }
 
-function getTypeName(type: number | string | undefined | null): string {
+function getTypeName(type: string): string {
   switch (type) {
     case "store":
       return "Loja";
@@ -227,7 +222,7 @@ function getTypeName(type: number | string | undefined | null): string {
   }
 }
 
-function getStatusName(status: number | string | undefined | null): string {
+function getStatusName(status: string): string {
   switch (status) {
     case "pending":
       return "Pendente";
@@ -240,7 +235,7 @@ function getStatusName(status: number | string | undefined | null): string {
   }
 }
 
-function getRoleName(role: number | string | undefined | null): string {
+function getRoleName(role: string): string {
   switch (role) {
     case "CUSTOMER":
       return "Cliente";
@@ -253,7 +248,7 @@ function getRoleName(role: number | string | undefined | null): string {
   }
 }
 
-function getStatusColor(status: number | string | undefined | null): string {
+function getStatusColor(status: string): string {
   switch (status) {
     case "pending":
       return "blue";

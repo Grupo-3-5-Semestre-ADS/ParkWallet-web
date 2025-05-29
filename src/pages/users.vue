@@ -11,10 +11,12 @@
       :loading="isLoading"
       show-edit-button
       show-inactivate-button
+      show-search
       @add="openDialog"
       @edit="editUser"
       @toggle="toggleActive"
       @load-more="loadMoreUsers"
+      @search-updated="handleSearch"
     />
 
     <CreateOrEditUsers
@@ -76,6 +78,7 @@ export default {
     const currentPage = ref(1);
     const itemsPerPage = ref(20);
     const allItemsLoaded = ref(false);
+    const currentSearchQuery = ref("");
 
     const headers = [
       {title: "Nome", key: "name", sortable: false},
@@ -94,22 +97,34 @@ export default {
       isLoading.value = true;
 
       try {
-        const response = await getUsers(currentPage.value, itemsPerPage.value);
+        const response = await getUsers(currentPage.value, itemsPerPage.value, currentSearchQuery.value);
+
         if (response && response.data && response._page) {
-          if (response.data.length > 0) {
-            const mappedData = response.data.map((user: any) => ({
-              ...user,
-              role: typeof user.role === 'object' && user.role !== null ? user.role.name : user.role || ""
-            }));
-            users.value.push(...mappedData);
-            currentPage.value++;
+          const newItems = response.data;
+
+          if (currentPage.value === 1) {
+            users.value = newItems;
+          } else {
+            users.value.push(...newItems);
           }
 
           if (response._page.current >= response._page.total) {
             allItemsLoaded.value = true;
+          } else {
+            allItemsLoaded.value = false;
+            currentPage.value++;
+          }
+
+          if (newItems.length === 0 && response._page.current === response._page.total) {
+            allItemsLoaded.value = true;
           }
         } else {
           console.error("Invalid data structure received from API for pagination:", response);
+
+          if (currentPage.value === 1) {
+            users.value = [];
+          }
+
           allItemsLoaded.value = true;
         }
       } catch (error) {
@@ -123,12 +138,16 @@ export default {
       fetchUsersPage();
     };
 
-    const resetAndLoadData = async () => {
+    const resetAndLoadData = async (searchQuery: string = "") => {
+      currentSearchQuery.value = searchQuery;
       users.value = [];
       currentPage.value = 1;
       allItemsLoaded.value = false;
-      isLoading.value = false;
       await fetchUsersPage();
+    };
+
+    const handleSearch = (searchTerm: string) => {
+      resetAndLoadData(searchTerm);
     };
 
     const openDialog = () => {
@@ -144,7 +163,6 @@ export default {
     };
 
     const onSaveUser = async (formData: UserForPage) => {
-      isLoading.value = true;
       let success = false;
       const {role: newRoleName, ...userData} = formData;
 
@@ -177,13 +195,12 @@ export default {
 
         if (success) {
           await resetAndLoadData();
-          dialog.value = false;
         }
       } catch (error: any) {
         console.error("Error saving user:", error);
       } finally {
-        if (!success) {
-          isLoading.value = false;
+        if (success) {
+          dialog.value = false;
         }
       }
     };
@@ -231,6 +248,7 @@ export default {
       toggleActive,
       editMode,
       loadMoreUsers,
+      handleSearch
     };
   }
 };

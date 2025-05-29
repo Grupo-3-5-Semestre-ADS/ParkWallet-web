@@ -10,13 +10,17 @@ const api = axios.create({
   },
 });
 
-export const getProducts = async (page = 1, size = 10) => {
-  const res = await api.get(collection, {
-    params: {
-      _page: page,
-      _size: size,
-    }
-  });
+export const getProducts = async (page = 1, size = 10, search = "") => {
+  const params = {
+    _page: page,
+    _size: size,
+  };
+
+  if (search && search.trim() !== "") {
+    params.search = search.trim();
+  }
+
+  const res = await api.get(collection, {params});
 
   return res.data;
 };
