@@ -236,14 +236,31 @@ function sendMessage() {
     return;
   }
 
+  const messageText = newMessage.value.trim();
   const messagePayload = {
-    senderUserId: myUserId.value,
     recipientUserId: selectedClient.value.id,
-    message: newMessage.value.trim(),
+    message: messageText,
   };
 
-  socket.emit('send_message', messagePayload);
+  // Adicionar mensagem localmente para UX imediata
+  const localMessage: Message = {
+    id: `temp-${Date.now()}`,
+    from: 'me',
+    text: messageText,
+    senderUserId: myUserId.value,
+    recipientUserId: selectedClient.value.id,
+    timestamp: new Date().toISOString(),
+  };
+  
+  messages.value.push(localMessage);
+  scrollToBottom();
+  
+  // Limpar campo antes de enviar
   newMessage.value = '';
+  
+  // Enviar mensagem via socket
+  console.log('Enviando mensagem:', messagePayload);
+  socket.emit('send_message', messagePayload);
 }
 
 function setupSocketListeners() {
@@ -280,21 +297,28 @@ function setupSocketListeners() {
   });
 
   socket.on('message_sent_ack', (serverMsg: ServerMessage) => {
-    const uiMessage = transformServerMessageToUIMessage(serverMsg, myUserId.value);
-
-    if (selectedClient.value &&
-        ((uiMessage.senderUserId === myUserId.value && uiMessage.recipientUserId === selectedClient.value.id) ||
-         (uiMessage.senderUserId === selectedClient.value.id && uiMessage.recipientUserId === myUserId.value))
-       ) {
-      const existingMsgIndex = messages.value.findIndex(m => m.id === uiMessage.id && m.id !== undefined);
-      if (existingMsgIndex === -1) {
-        messages.value.push(uiMessage);
-        scrollToBottom();
-      } else {
-        messages.value[existingMsgIndex] = uiMessage;
+    console.log('Mensagem enviada confirmada:', serverMsg);
+    
+    // Atualizar a mensagem local temporária com o ID real do servidor
+    if (selectedClient.value && serverMsg.recipientUserId === selectedClient.value.id) {
+      const tempMsgIndex = messages.value.findIndex(m => 
+        m.from === 'me' && 
+        m.text === serverMsg.message && 
+        typeof m.id === 'string' && 
+        m.id.startsWith('temp-')
+      );
+      
+      if (tempMsgIndex !== -1) {
+        // Atualizar com dados reais do servidor
+        messages.value[tempMsgIndex] = {
+          ...messages.value[tempMsgIndex],
+          id: serverMsg.id,
+          timestamp: serverMsg.createdAt
+        };
       }
     }
 
+    // Atualizar a última mensagem na lista de clientes
     const clientToUpdate = clients.value.find(c => c.id === serverMsg.recipientUserId);
     if (clientToUpdate) {
       clientToUpdate.lastMessage = serverMsg.message;
