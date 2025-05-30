@@ -113,7 +113,7 @@
 </template>
 
 <script lang="ts">
-import {nextTick, onMounted, ref} from "vue";
+import {inject, nextTick, onMounted, ref} from "vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import CreateOrEditFacilities from "@/components/dialogs/CreateOrEditFacilities.vue";
 import MapDialog from "@/components/dialogs/MapDialog.vue";
@@ -121,6 +121,16 @@ import DefaultTable from "@/components/DefaultTable.vue";
 import {createFacility, getFacilities, toggleFacilityActive, updateFacility} from '@/services/facilitiesService.js';
 import FacilityProducts from "@/components/dialogs/FacilityProducts.vue";
 import FacilityTransactions from "@/components/dialogs/FacilityTransactions.vue";
+
+interface Facility {
+  id?: number;
+  name: string;
+  description: string;
+  type: 'store' | 'attraction' | 'other' | null;
+  latitude: number | null;
+  longitude: number | null;
+  active?: boolean;
+}
 
 export default {
   name: "FacilitiesPage",
@@ -133,7 +143,7 @@ export default {
     const selectedCoords = ref({latitude: "0", longitude: "0"});
     const facility = ref({id: null, name: "", description: "", type: "", latitude: "", longitude: ""});
 
-    const facilities = ref<any[]>([]);
+    const facilities = ref<Facility[]>([]);
     const isLoading = ref(false);
     const currentPage = ref(1);
     const itemsPerPage = ref(20);
@@ -155,6 +165,8 @@ export default {
       {title: "Ativo", key: "active", sortable: false},
       {title: "Ações", key: "actions", sortable: false}
     ];
+
+    const showSnackbar = inject<(message: string, color?: string) => void>('showSnackbar');
 
     const fetchFacilitiesPage = async () => {
       if (isLoading.value || allItemsLoaded.value) {
@@ -205,8 +217,7 @@ export default {
       fetchFacilitiesPage();
     };
 
-    const resetAndLoadData = async (searchQuery: string = "") => {
-      currentSearchQuery.value = searchQuery;
+    const resetAndLoadData = async () => {
       facilities.value = [];
       currentPage.value = 1;
       allItemsLoaded.value = false;
@@ -214,6 +225,7 @@ export default {
     };
 
     const handleSearch = (searchTerm: string) => {
+      currentSearchQuery.value = searchTerm;
       resetAndLoadData(searchTerm);
     };
 
@@ -223,70 +235,63 @@ export default {
       dialog.value = true;
     };
 
-    const editFacility = (item: any) => {
+    const editFacility = (item: Facility) => {
       facility.value = {...item};
       editMode.value = true;
       dialog.value = true;
     };
 
-    const onSaveFacility = async (data: any) => {
-      let success = false;
+    const onSaveFacility = async (data: Facility) => {
       try {
         if (editMode.value) {
           const statusCode = await updateFacility(data.id, data);
+
           if (statusCode === 200) {
-            success = true;
+            await resetAndLoadData();
+            dialog.value = false;
+            showSnackbar('Estabelecimento atualizado com sucesso!', 'success');
           } else {
-            console.error("Update failed with status:", statusCode);
+            showSnackbar('Erro ao atualizar estabelecimento!', 'error');
           }
         } else {
           const statusCode = await createFacility(data);
 
           if (statusCode === 201) {
-            success = true;
+            await resetAndLoadData();
+            dialog.value = false;
+            showSnackbar('Estabelecimento cadastrado com sucesso!', 'success');
           } else {
-            console.error("Create failed");
+            showSnackbar('Erro ao cadastrar estabelecimento!', 'error');
           }
         }
-
-        if (success) {
-          isLoading.value = false;
-          await resetAndLoadData();
-        }
-
       } catch (error) {
         console.error("Error saving facility:", error);
-      } finally {
-        if (success) {
-          dialog.value = false;
-        }
       }
     };
 
-    const toggleActive = async (item: any) => {
-      const originalStatus = item.active;
-      const index = facilities.value.findIndex(f => f.id === item.id);
-      if (index !== -1) {
-        facilities.value[index].active = !facilities.value[index].active;
+    const toggleActive = async (item: Facility) => {
+      const facilityIndex = facilities.value.findIndex(f => f.id === item.id);
+
+      if (facilityIndex === -1) {
+        return;
       }
 
       try {
         const statusCode = await toggleFacilityActive(item.id);
-        if (statusCode !== 200) {
-          if (index !== -1) {
-            facilities.value[index].active = originalStatus;
-          }
-          console.error("Toggle status failed with status:", statusCode);
+
+        if (statusCode === 200) {
+          facilities.value[facilityIndex].active = !facilities.value[facilityIndex].active;
+          showSnackbar('Estabelecimento atualizado com sucesso!', 'success');
+        } else {
+          showSnackbar('Erro ao atualizar estabelecimento!', 'error');
         }
       } catch (error) {
-        if (index !== -1) {
-          facilities.value[index].active = originalStatus;
-        }
         console.error("Error toggling facility status:", error);
+        showSnackbar('Erro ao atualizar estabelecimento!', 'error');
       }
     };
 
-    const openMap = (item: any) => {
+    const openMap = (item: Facility) => {
       selectedCoords.value = {latitude: item.latitude, longitude: item.longitude};
       showMapDialog.value = true;
     };

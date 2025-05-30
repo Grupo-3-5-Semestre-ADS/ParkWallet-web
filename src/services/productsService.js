@@ -32,7 +32,7 @@ export const getProduct = async (id) => {
 
 export const createProduct = async (data) => {
   const res = await api.post(collection, data);
-  return res.data;
+  return res.status;
 };
 
 export const updateProduct = async (id, data) => {

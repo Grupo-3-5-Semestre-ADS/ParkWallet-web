@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import {onMounted, ref} from "vue";
+import {inject, onMounted, ref} from "vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import CreateOrEditProducts from "@/components/dialogs/CreateOrEditProducts.vue";
 import DefaultTable from "@/components/DefaultTable.vue";
@@ -49,6 +49,16 @@ import {
   updateProduct
 } from "@/services/productsService.js";
 
+interface Product {
+  id: number | null;
+  name: string;
+  description: string;
+  price: number;
+  facilityId: number | null;
+  active: boolean;
+  facility?: { name: string };
+}
+
 export default {
   name: "ProductsPage",
   components: {DefaultTable, ConfirmDialog, CreateOrEditProducts},
@@ -58,7 +68,7 @@ export default {
     const editMode = ref(false);
     const product = ref({id: null, name: "", description: "", price: 0, facilityId: null, active: true});
 
-    const products = ref<any[]>([]);
+    const products = ref<Product[]>([]);
     const isLoading = ref(false);
     const currentPage = ref(1);
     const itemsPerPage = ref(20);
@@ -73,6 +83,8 @@ export default {
       {title: "Ativo", key: "active", sortable: false},
       {title: "Ações", key: "actions", sortable: false}
     ];
+
+    const showSnackbar = inject<(message: string, color?: string) => void>('showSnackbar');
 
     const fetchProductsPage = async () => {
       if (isLoading.value || allItemsLoaded.value) {
@@ -122,8 +134,7 @@ export default {
       fetchProductsPage();
     };
 
-    const resetAndLoadData = async (searchQuery: string = "") => {
-      currentSearchQuery.value = searchQuery;
+    const resetAndLoadData = async () => {
       products.value = [];
       currentPage.value = 1;
       allItemsLoaded.value = false;
@@ -131,7 +142,8 @@ export default {
     };
 
     const handleSearch = (searchTerm: string) => {
-      resetAndLoadData(searchTerm);
+      currentSearchQuery.value = searchTerm;
+      resetAndLoadData();
     };
 
     const openDialog = () => {
@@ -140,64 +152,59 @@ export default {
       dialog.value = true;
     };
 
-    const editProduct = (item: any) => {
-      product.value = {...item};
+    const editProduct = (item: Product) => {
+      product.value = item;
       editMode.value = true;
       dialog.value = true;
     };
 
-    const onSaveProduct = async (data: any) => {
-      let success = false;
+    const onSaveProduct = async (data: Product) => {
       try {
         if (editMode.value) {
           const statusCode = await updateProduct(data.id, data);
+
           if (statusCode === 200) {
-            success = true;
+            await resetAndLoadData();
+            dialog.value = false;
+            showSnackbar('Produto atualizado com sucesso!', 'success');
           } else {
-            console.error("Update failed with status:", statusCode);
+            showSnackbar('Erro ao atualizar produto!', 'error');
           }
         } else {
-          const createdProduct = await createProduct(data);
-          if (createdProduct) {
-            success = true;
-          } else {
-            console.error("Create failed");
-          }
-        }
+          const statusCode = await createProduct(data);
 
-        if (success) {
-          await resetAndLoadData();
+          if (statusCode === 201) {
+            await resetAndLoadData();
+            dialog.value = false;
+            showSnackbar('Produto cadastrado com sucesso!', 'success');
+          } else {
+            showSnackbar('Erro ao cadastrar produto!', 'error');
+          }
         }
       } catch (error) {
         console.error("Error saving product:", error);
-      } finally {
-        if (success) {
-          dialog.value = false;
-        }
       }
     };
 
-    const toggleActive = async (item: any) => {
-      const originalStatus = item.active;
-      const index = products.value.findIndex(p => p.id === item.id);
+    const toggleActive = async (item: Product) => {
+      const productIndex = products.value.findIndex(p => p.id === item.id);
 
-      if (index !== -1) {
-        products.value[index].active = !products.value[index].active;
+      if (productIndex === -1) {
+        return;
       }
 
       try {
         const statusCode = await toggleProductActive(item.id);
-        if (statusCode !== 200) {
-          if (index !== -1) {
-            products.value[index].active = originalStatus;
-          }
-          console.error("Toggle status failed with status:", statusCode);
+
+        if (statusCode === 200) {
+          products.value[productIndex].active = !products.value[productIndex].active;
+          showSnackbar('Usuário atualizado com sucesso!', 'success');
+        } else {
+          showSnackbar('Erro ao atualizar usuário!', 'error');
         }
       } catch (error) {
-        if (index !== -1) {
-          products.value[index].active = originalStatus;
-        }
         console.error("Error toggling product status:", error);
+        showSnackbar('Erro ao atualizar usuário!', 'error');
       }
     };
 

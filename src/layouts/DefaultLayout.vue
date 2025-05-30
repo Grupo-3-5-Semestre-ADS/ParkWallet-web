@@ -99,21 +99,27 @@
         <slot />
       </v-container>
     </v-main>
+
+    <v-snackbar
+      v-model="snackbar"
+      :color="snackbarColor"
+      timeout="3000"
+    >
+      {{ snackbarMessage }}
+    </v-snackbar>
   </v-app>
 </template>
 
 <script setup lang="ts">
-import {ref, computed} from "vue";
+import {ref, computed, provide} from "vue";
 import {useDisplay} from "vuetify";
 
 const drawer = ref(true);
 const expanded = ref(false);
 
-// Detecta se está em tela pequena
 const {mdAndDown} = useDisplay();
 const isMobile = computed(() => mdAndDown.value);
 
-// Função de toggle inteligente
 const toggleDrawer = () => {
   if (isMobile.value) {
     drawer.value = !drawer.value;
@@ -121,6 +127,18 @@ const toggleDrawer = () => {
     expanded.value = !expanded.value;
   }
 };
+
+const snackbar = ref(false);
+const snackbarMessage = ref('');
+const snackbarColor = ref('');
+
+const showSnackbar = (message: string, color = 'success') => {
+  snackbarMessage.value = message;
+  snackbarColor.value = color;
+  snackbar.value = true;
+};
+
+provide('showSnackbar', showSnackbar);
 </script>
 
 <style scoped>

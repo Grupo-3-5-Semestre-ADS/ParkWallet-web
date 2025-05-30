@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import {onMounted, ref} from "vue";
+import {inject, onMounted, ref} from "vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import CreateOrEditUsers from "@/components/dialogs/CreateOrEditUsers.vue";
 import DefaultTable from "@/components/DefaultTable.vue";
@@ -90,6 +90,8 @@ export default {
       {title: "Ações", key: "actions", sortable: false}
     ];
 
+    const showSnackbar = inject<(message: string, color?: string) => void>('showSnackbar');
+
     const fetchUsersPage = async () => {
       if (isLoading.value || allItemsLoaded.value) {
         return;
@@ -138,8 +140,7 @@ export default {
       fetchUsersPage();
     };
 
-    const resetAndLoadData = async (searchQuery: string = "") => {
-      currentSearchQuery.value = searchQuery;
+    const resetAndLoadData = async () => {
       users.value = [];
       currentPage.value = 1;
       allItemsLoaded.value = false;
@@ -147,6 +148,7 @@ export default {
     };
 
     const handleSearch = (searchTerm: string) => {
+      currentSearchQuery.value = searchTerm;
       resetAndLoadData(searchTerm);
     };
 
@@ -163,71 +165,49 @@ export default {
     };
 
     const onSaveUser = async (formData: UserForPage) => {
-      let success = false;
-      const {role: newRoleName, ...userData} = formData;
-
       try {
-        if (editMode.value && userData.id) {
-          const updateStatusCode = await updateUser(userData.id, userData);
+        if (editMode.value && formData.id) {
+          const updateStatusCode = await updateUser(formData.id, formData);
 
           if (updateStatusCode === 200) {
-            const originalUser = users.value.find(u => u.id === userData.id);
+            const originalUser = users.value.find(u => u.id === formData.id);
             const originalRoleName = originalUser?.role || "";
 
-            if (newRoleName !== undefined && newRoleName !== originalRoleName) {
-              await updateUserRole(userData.id, {role: newRoleName});
+            if (formData.role !== originalRoleName) {
+              await updateUserRole(formData.id, {role: formData.role});
             }
-            success = true;
-          } else {
-            console.error("Update user failed with status:", updateStatusCode);
-          }
-        } else {
-          const userToCreate = {...userData, role: newRoleName};
-          delete userToCreate.id;
 
-          const createdUserResponse = await addUser(userToCreate);
-          if (createdUserResponse && (createdUserResponse.id || createdUserResponse.status === 201 || createdUserResponse.status === 200)) {
-            success = true;
+            await resetAndLoadData();
+            dialog.value = false;
+            showSnackbar('Usuário atualizado com sucesso!', 'success');
           } else {
-            console.error("Create user failed:", createdUserResponse);
+            showSnackbar('Erro ao atualizar usuário!', 'error');
           }
         }
-
-        if (success) {
-          await resetAndLoadData();
-        }
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error saving user:", error);
-      } finally {
-        if (success) {
-          dialog.value = false;
-        }
       }
     };
 
     const toggleActive = async (item: UserForPage) => {
-      if (item.id === null) return;
+      const userIndex = users.value.findIndex(user => user.id === item.id);
 
-      const originalStatus = item.active;
-      const index = users.value.findIndex(u => u.id === item.id);
-
-      if (index !== -1) {
-        users.value[index].active = !users.value[index].active;
+      if (userIndex === -1) {
+        return;
       }
 
       try {
         const statusCode = await toggleUserActive(item.id);
-        if (statusCode !== 200) {
-          if (index !== -1) {
-            users.value[index].active = originalStatus;
-          }
-          console.error("Toggle user status failed with status:", statusCode);
+
+        if (statusCode === 200) {
+          users.value[userIndex].active = !users.value[userIndex].active;
+          showSnackbar('Usuário atualizado com sucesso!', 'success');
+        } else {
+          showSnackbar('Erro ao atualizar usuário!', 'error');
         }
       } catch (error) {
-        if (index !== -1) {
-          users.value[index].active = originalStatus;
-        }
         console.error("Error toggling user status:", error);
+        showSnackbar('Erro ao atualizar usuário!', 'error');
       }
     };
 
