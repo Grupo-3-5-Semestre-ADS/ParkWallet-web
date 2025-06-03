@@ -9,9 +9,9 @@
       :table-items="facilities"
       :headers="headers"
       :loading="isLoading"
-      show-add-button
-      show-edit-button
-      show-inactivate-button
+      :show-add-button="isAdmin"
+      :show-edit-button="isAdmin"
+      :show-inactivate-button="isAdmin"
       show-search
       @add="openDialog"
       @edit="editFacility"
@@ -113,7 +113,7 @@
 </template>
 
 <script lang="ts">
-import {inject, nextTick, onMounted, ref} from "vue";
+import {computed, inject, nextTick, onMounted, ref} from "vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import CreateOrEditFacilities from "@/components/dialogs/CreateOrEditFacilities.vue";
 import MapDialog from "@/components/dialogs/MapDialog.vue";
@@ -167,6 +167,11 @@ export default {
     ];
 
     const showSnackbar = inject<(message: string, color?: string) => void>('showSnackbar');
+    const userData = inject<any>('userData');
+
+    const isAdmin = computed(() => {
+      return userData.value?.role === 'ADMIN';
+    });
 
     const fetchFacilitiesPage = async () => {
       if (isLoading.value || allItemsLoaded.value) {
@@ -335,7 +340,8 @@ export default {
       showFacilityTransactionsModal,
       selectedFacilityForTransactions,
       openFacilityTransactionsDialog,
-      handleSearch
+      handleSearch,
+      isAdmin
     };
   }
 };

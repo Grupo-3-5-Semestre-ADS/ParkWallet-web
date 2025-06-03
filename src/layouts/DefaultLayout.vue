@@ -13,7 +13,7 @@
         </v-btn>
       </template>
 
-      <v-spacer />
+      <v-spacer/>
 
       <v-img
         src="../assets/itaipuland-logo-white.png"
@@ -41,7 +41,7 @@
           />
         </v-list>
 
-        <v-divider />
+        <v-divider/>
 
         <v-list
           nav
@@ -60,6 +60,7 @@
             Produtos
           </v-list-item>
           <v-list-item
+            v-if="isAdmin"
             to="/users"
             prepend-icon="mdi-account-group"
           >
@@ -73,7 +74,7 @@
           </v-list-item>
         </v-list>
 
-        <div class="navigator-spacer" />
+        <div class="navigator-spacer"/>
 
         <v-list
           nav
@@ -96,7 +97,7 @@
         fluid
         class="content-container"
       >
-        <slot />
+        <slot/>
       </v-container>
     </v-main>
 
@@ -111,8 +112,12 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed, provide} from "vue";
+import {ref, computed, provide, onMounted} from "vue";
+import {useRouter} from "vue-router";
 import {useDisplay} from "vuetify";
+import {jwtDecode} from "jwt-decode";
+
+const router = useRouter();
 
 const drawer = ref(true);
 const expanded = ref(false);
@@ -131,6 +136,7 @@ const toggleDrawer = () => {
 const snackbar = ref(false);
 const snackbarMessage = ref('');
 const snackbarColor = ref('');
+const userData = ref<any>(null);
 
 const showSnackbar = (message: string, color = 'success') => {
   snackbarMessage.value = message;
@@ -139,6 +145,27 @@ const showSnackbar = (message: string, color = 'success') => {
 };
 
 provide('showSnackbar', showSnackbar);
+provide('userData', userData);
+
+const isAdmin = computed(() => {
+  return userData.value?.role === 'ADMIN';
+});
+
+onMounted(() => {
+  const token = localStorage.getItem('authToken');
+
+  if (!token) {
+    router.push('/login');
+  } else {
+    const decodedToken = jwtDecode(token)
+
+    if (!decodedToken) {
+      router.push('/login');
+    } else {
+      userData.value = decodedToken;
+    }
+  }
+});
 </script>
 
 <style scoped>

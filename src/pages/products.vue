@@ -9,9 +9,9 @@
       :table-items="products"
       :headers="headers"
       :loading="isLoading"
-      show-add-button
-      show-edit-button
-      show-inactivate-button
+      :show-add-button="isAdmin"
+      :show-edit-button="isAdmin"
+      :show-inactivate-button="isAdmin"
       show-search
       @add="openDialog"
       @edit="editProduct"
@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import {inject, onMounted, ref} from "vue";
+import {computed, inject, onMounted, ref} from "vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import CreateOrEditProducts from "@/components/dialogs/CreateOrEditProducts.vue";
 import DefaultTable from "@/components/DefaultTable.vue";
@@ -75,16 +75,28 @@ export default {
     const allItemsLoaded = ref(false);
     const currentSearchQuery = ref("");
 
-    const headers = [
-      {title: "Nome", key: "name", sortable: false},
-      {title: "Estabelecimento", key: "facility.name", sortable: false},
-      {title: "Descrição", key: "description", sortable: false},
-      {title: "Valor", key: "price", sortable: false},
-      {title: "Ativo", key: "active", sortable: false},
-      {title: "Ações", key: "actions", sortable: false}
-    ];
+    const headers = computed(() => {
+      const baseHeaders = [
+        {title: "Nome", key: "name", sortable: false},
+        {title: "Estabelecimento", key: "facility.name", sortable: false},
+        {title: "Descrição", key: "description", sortable: false},
+        {title: "Valor", key: "price", sortable: false},
+        {title: "Ativo", key: "active", sortable: false},
+      ];
+
+      if (isAdmin.value) {
+        baseHeaders.push({title: "Ações", key: "actions", sortable: false});
+      }
+
+      return baseHeaders;
+    });
 
     const showSnackbar = inject<(message: string, color?: string) => void>('showSnackbar');
+    const userData = inject<any>('userData');
+
+    const isAdmin = computed(() => {
+      return userData.value?.role === 'ADMIN';
+    });
 
     const fetchProductsPage = async () => {
       if (isLoading.value || allItemsLoaded.value) {
@@ -225,7 +237,8 @@ export default {
       toggleActive,
       editMode,
       loadMoreProducts,
-      handleSearch
+      handleSearch,
+      isAdmin
     };
   }
 };

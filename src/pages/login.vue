@@ -76,6 +76,7 @@
 import {ref, computed} from 'vue'
 import {useRouter} from 'vue-router'
 import {login} from '@/services/authService.js'
+import {jwtDecode} from "jwt-decode";
 
 export default {
   name: 'LoginPage',
@@ -129,18 +130,28 @@ export default {
         }
         const response = await login(credentials)
 
-        if (response && response.token) {
-          localStorage.setItem('authToken', response.token)
-          await router.push('/facilities')
-        } else {
-          errorMessage.value = 'Resposta de login inesperada. Tente novamente.'
+        const token = response.token;
+
+        if (!token) {
+          errorMessage.value = 'Falha no login. Verifique suas credenciais ou tente novamente mais tarde.'
+          loading.value = false
+          return
         }
+
+        const decodedToken = jwtDecode(token)
+
+        if (!decodedToken || decodedToken.role === "CUSTOMER") {
+          errorMessage.value = 'Falha no login. Você não tem permissão para acessar esta plataforma.'
+          loading.value = false
+          return
+        }
+
+        localStorage.setItem('authToken', token)
+        await router.push('/facilities')
 
       } catch (error: any) {
         console.error('Login failed:', error)
         errorMessage.value = 'Falha no login. Verifique suas credenciais ou tente novamente mais tarde.'
-      } finally {
-        loading.value = false
       }
     }
 
