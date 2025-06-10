@@ -146,7 +146,8 @@ export default {
           return
         }
 
-        localStorage.setItem('authToken', token)
+        await localStorage.removeItem('authToken');
+        await localStorage.setItem('authToken', token)
         await router.push('/facilities')
 
       } catch (error: any) {
