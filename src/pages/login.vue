@@ -153,6 +153,7 @@ export default {
       } catch (error: any) {
         console.error('Login failed:', error)
         errorMessage.value = 'Falha no login. Verifique suas credenciais ou tente novamente mais tarde.'
+        loading.value = false
       }
     }
 
