@@ -80,4 +80,9 @@ export const updateUserRole = async (id, data) => {
   return res.status;
 };
 
+export const resetUserPassword = async (id) => {
+  const res = await api.post(`${collection}/${id}/reset-password`);
+  return res.status;
+};
+
 export default api;
