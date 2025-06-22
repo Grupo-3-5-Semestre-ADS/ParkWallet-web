@@ -17,7 +17,26 @@
       @toggle="toggleActive"
       @load-more="loadMoreUsers"
       @search-updated="handleSearch"
-    />
+    >
+      <template #custom-actions="{ item }">
+        <v-tooltip
+          text="Resetar Senha"
+        >
+          <template #activator="{ props: tooltipProps }">
+            <v-btn
+              v-bind="tooltipProps"
+              icon
+              color="orange"
+              size="x-small"
+              class="mr-2"
+              @click="promptResetPassword(item)"
+            >
+              <v-icon>mdi-lock-reset</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+      </template>
+    </DefaultTable>
 
     <CreateOrEditUsers
       v-model="dialog"
@@ -33,6 +52,13 @@
       message="Tem certeza que deseja sair sem salvar?"
       @confirm="dialog = false"
     />
+
+    <ConfirmDialog
+      v-model="confirmResetDialog"
+      title="Confirmar Reset de Senha"
+      :message="`Tem certeza que deseja resetar a senha do usuário '${userToReset?.name}'?`"
+      @confirm="handleConfirmResetPassword"
+    />
   </v-container>
 </template>
 
@@ -44,9 +70,9 @@ import DefaultTable from "@/components/DefaultTable.vue";
 import {
   getUsers,
   updateUser,
-  addUser,
   updateUserRole,
-  toggleUserActive
+  toggleUserActive,
+  resetUserPassword
 } from "@/services/usersService.js";
 
 interface UserForPage {
@@ -67,6 +93,9 @@ export default {
     const dialog = ref(false);
     const confirmClose = ref(false);
     const editMode = ref(false);
+
+    const confirmResetDialog = ref(false);
+    const userToReset = ref<UserForPage | null>(null);
 
     const initialUser: UserForPage = {
       id: null, name: "", email: "", cpf: "", birthdate: "", active: true, role: ""
@@ -149,7 +178,7 @@ export default {
 
     const handleSearch = (searchTerm: string) => {
       currentSearchQuery.value = searchTerm;
-      resetAndLoadData(searchTerm);
+      resetAndLoadData();
     };
 
     const openDialog = () => {
@@ -211,6 +240,34 @@ export default {
       }
     };
 
+    const promptResetPassword = (user: UserForPage) => {
+      userToReset.value = user;
+      confirmResetDialog.value = true;
+    };
+
+    const handleConfirmResetPassword = async () => {
+      if (!userToReset.value || !userToReset.value.id) {
+        return;
+      }
+
+      try {
+        const statusCode = await resetUserPassword(userToReset.value.id);
+
+        if (statusCode === 200) {
+          showSnackbar('Senha do usuário resetada com sucesso!', 'success');
+        } else {
+          showSnackbar('Erro ao resetar a senha do usuário.', 'error');
+        }
+      } catch (error) {
+        console.error("Error resetting user password:", error);
+        showSnackbar('Erro ao resetar a senha do usuário.', 'error');
+      } finally {
+        confirmResetDialog.value = false;
+        userToReset.value = null;
+      }
+    };
+
+
     onMounted(() => {
       resetAndLoadData();
     });
@@ -228,7 +285,11 @@ export default {
       toggleActive,
       editMode,
       loadMoreUsers,
-      handleSearch
+      handleSearch,
+      confirmResetDialog,
+      userToReset,
+      promptResetPassword,
+      handleConfirmResetPassword
     };
   }
 };
